@@ -11,25 +11,55 @@ const SignupForm = ({ onSignup }) => {
     address: '',
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    // Name validation: must not contain digits
+    if (/\d/.test(formData.name)) {
+      newErrors.name = 'Name cannot contain any digits.';
+    }
+
+    // Phone number validation: must start with '0' and be 11 digits
+    if (!formData.phone_number.startsWith('0')) {
+      newErrors.phone_number = 'Phone number must start with 0.';
+    } else if (!/^\d{11}$/.test(formData.phone_number)) {
+      newErrors.phone_number = 'Phone number must be exactly 11 digits long.';
+    }
+
+    return newErrors;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSignup(formData);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      setErrors({}); // Clear errors if validation passes
+      onSignup(formData);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Input
-        label="Name"
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
+      <div>
+        <Input
+          label="Name"
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+      </div>
       <Input
         label="Email"
         type="email"
@@ -46,14 +76,17 @@ const SignupForm = ({ onSignup }) => {
         onChange={handleChange}
         required
       />
-      <Input
-        label="Phone"
-        type="text"
-        name="phone_number"
-        value={formData.phone_number}
-        onChange={handleChange}
-        required
-      />
+      <div>
+        <Input
+          label="Phone"
+          type="text"
+          name="phone_number"
+          value={formData.phone_number}
+          onChange={handleChange}
+          required
+        />
+        {errors.phone_number && <p className="text-red-500 text-xs mt-1">{errors.phone_number}</p>}
+      </div>
       <Input
         label="Address"
         type="text"
