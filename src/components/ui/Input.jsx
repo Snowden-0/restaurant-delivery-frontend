@@ -11,7 +11,7 @@ const Input = ({ label, id, name, type, value, onChange, required }) => {
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="w-full px-4 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
       />
     </div>
   );

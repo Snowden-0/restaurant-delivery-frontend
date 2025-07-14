@@ -4,7 +4,7 @@ import LoginForm from '../../components/auth/LoginForm';
 
 const LoginPage = ({ onLogin }) => {
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="bg-gray-200 p-8 rounded-lg shadow-md w-full max-w-md">
       <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Login</h1>
       <LoginForm onLogin={onLogin} />
       <div className="mt-4 text-center">
