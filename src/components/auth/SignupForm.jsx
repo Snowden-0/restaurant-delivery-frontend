@@ -7,6 +7,8 @@ const SignupForm = ({ onSignup }) => {
     name: '',
     email: '',
     password: '',
+    phone_number: '',
+    address: '',
   });
 
   const handleChange = (e) => {
@@ -41,6 +43,22 @@ const SignupForm = ({ onSignup }) => {
         type="password"
         name="password"
         value={formData.password}
+        onChange={handleChange}
+        required
+      />
+      <Input
+        label="Phone"
+        type="text"
+        name="phone_number"
+        value={formData.phone_number}
+        onChange={handleChange}
+        required
+      />
+      <Input
+        label="Address"
+        type="text"
+        name="address"
+        value={formData.address}
         onChange={handleChange}
         required
       />
