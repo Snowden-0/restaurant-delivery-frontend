@@ -6,6 +6,8 @@ import HomePage from './views/HomePage';
 import * as authService from './services/authServices';
 import ErrorPopup from './components/ui/ErrorPopup';
 
+const MAIN_DIV_CLASS = 'min-h-screen flex items-center justify-center bg-gray-900';
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState(null);
@@ -36,7 +38,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+    <div className={MAIN_DIV_CLASS}>
       {error && <ErrorPopup message={error} onClose={() => setError(null)} />}
       <Router>
         <Routes>

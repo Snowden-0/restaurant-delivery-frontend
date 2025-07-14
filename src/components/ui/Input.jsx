@@ -1,3 +1,5 @@
+const DEFALUT_INPUT_FIELD_CLASS = 'w-full px-4 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500';
+
 const Input = ({ label, id, name, type, value, onChange, required }) => {
   return (
     <div className="mb-4">
@@ -11,7 +13,7 @@ const Input = ({ label, id, name, type, value, onChange, required }) => {
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className={DEFALUT_INPUT_FIELD_CLASS}
       />
     </div>
   );
