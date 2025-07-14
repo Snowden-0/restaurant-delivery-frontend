@@ -4,13 +4,13 @@ const ErrorPopup = ({ message, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 5000);
+    }, 2000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
-    <div className="fixed top-4 right-4 z-50">
-      <div className="bg-red-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center">
+    <div className="fixed top-4 z-50">
+      <div className="bg-red-500 text-white text-xl px-6 py-4 rounded-lg shadow-lg flex items-center">
         <span>{message}</span>
         <button 
           onClick={onClose}
