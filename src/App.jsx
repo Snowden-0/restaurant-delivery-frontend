@@ -5,6 +5,7 @@ import SignupPage from './views/user/SignupPage';
 import HomePage from './views/HomePage';
 import * as authService from './services/authServices';
 import ErrorPopup from './components/ui/ErrorPopup';
+import  Layout  from './Layout/Layout';
 
 const MAIN_DIV_CLASS = 'min-h-screen flex items-center justify-center bg-gray-900';
 
@@ -38,36 +39,45 @@ function App() {
   };
 
   return (
-    <div className={MAIN_DIV_CLASS}>
-      {error && <ErrorPopup message={error} onClose={() => setError(null)} />}
-      <Router>
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              isAuthenticated ? 
-                <HomePage onLogout={handleLogout} /> : 
-                <Navigate to="/login" replace />
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              !isAuthenticated ? 
-                <LoginPage onLogin={(data) => handleAuth(data, 'login')} /> : 
-                <Navigate to="/" replace />
-            } 
-          />
-          <Route 
-            path="/signup" 
-            element={
-              !isAuthenticated ? 
-                <SignupPage onSignup={(data) => handleAuth(data, 'signup')} /> : 
-                <Navigate to="/" replace />
-            } 
-          />
-        </Routes>
-      </Router>
+    // <div className={MAIN_DIV_CLASS}>
+    //   {error && <ErrorPopup message={error} onClose={() => setError(null)} />}
+    //   <Router>
+    //     <Routes>
+    //       <Route 
+    //         path="/" 
+    //         element={
+    //           isAuthenticated ? 
+    //             <HomePage onLogout={handleLogout} /> : 
+    //             <Navigate to="/login" replace />
+    //         } 
+    //       />
+    //       <Route 
+    //         path="/login" 
+    //         element={
+    //           !isAuthenticated ? 
+    //             <LoginPage onLogin={(data) => handleAuth(data, 'login')} /> : 
+    //             <Navigate to="/" replace />
+    //         } 
+    //       />
+    //       <Route 
+    //         path="/signup" 
+    //         element={
+    //           !isAuthenticated ? 
+    //             <SignupPage onSignup={(data) => handleAuth(data, 'signup')} /> : 
+    //             <Navigate to="/" replace />
+    //         } 
+    //       />
+    //     </Routes>
+    //   </Router>
+    //</div>
+    <div>
+      <Layout>
+      {/* Your page content will go here */}
+      <div className="text-center text-gray-500 py-20">
+        <p className="text-lg">Main content area - ready for your components</p>
+      </div>
+    </Layout>
+      
     </div>
   );
 }

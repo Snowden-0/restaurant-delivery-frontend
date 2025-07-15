@@ -4,23 +4,46 @@ import Sidebar from './Sidebar';
 import Footer from './Footer';
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeItem, setActiveItem] = useState('/');
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
+  const toggleSidebarCollapse = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+  const handleItemClick = (href) => {
+    setActiveItem(href);
+    // Close mobile sidebar when item is clicked
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Header toggleSidebar={toggleSidebar} />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar isOpen={sidebarOpen} />
-        <main className={`flex-1 overflow-y-auto transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
-          <div className="p-4 md:p-6 max-w-7xl mx-auto w-full">
-            {children}
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header
+        onToggleSidebar={toggleSidebar}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebarCollapse={toggleSidebarCollapse}
+        isSidebarCollapsed={isSidebarCollapsed}
+      />
+
+      <div className="flex">
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+          isCollapsed={isSidebarCollapsed}
+          activeItem={activeItem}
+          onItemClick={handleItemClick}
+        />
+
+        <main
+          className={`flex-1 ${isSidebarCollapsed ? "lg:ml-24" : "lg:ml-64"}`}
+        >
+          <div className="p-6 min-h-screen">{children}</div>
         </main>
       </div>
+
       <Footer />
     </div>
   );

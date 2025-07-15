@@ -1,64 +1,78 @@
 import React from 'react';
+import NavItem from './NavItem';
 import { 
   Home, 
-  Utensils, 
+  UtensilsCrossed, 
   ShoppingCart, 
+  Star, 
   Users, 
-  Settings, 
-  HelpCircle 
+  Settings
 } from 'lucide-react';
-import NavItem from './NavItem';
-import ResizablePanel from '../components/ui/ResizablePanel';
 
-const Sidebar = ({ isOpen }) => {
-  const navItems = [
-    { icon: <Home />, label: 'Dashboard', href: '/' },
-    { icon: <Utensils />, label: 'Restaurants', href: '/restaurants' },
-    { icon: <ShoppingCart />, label: 'Orders', href: '/orders' },
-    { icon: <Users />, label: 'Customers', href: '/customers' },
-    { icon: <Settings />, label: 'Settings', href: '/settings' },
-    { icon: <HelpCircle />, label: 'Support', href: '/support' },
+const Sidebar = ({ isOpen, onClose, isCollapsed, activeItem, onItemClick }) => {
+  const menuItems = [
+    { icon: Home, label: 'Dashboard', href: '/' },
+    { icon: UtensilsCrossed, label: 'Restaurants', href: '/restaurants' },
+    { icon: ShoppingCart, label: 'Orders', href: '/orders' },
+    { icon: Star, label: 'Reviews', href: '/reviews' },
+    { icon: Users, label: 'Customers', href: '/customers' },
+    { icon: Settings, label: 'Settings', href: '/settings' },
   ];
 
   return (
-    <ResizablePanel 
-      isOpen={isOpen} 
-      defaultWidth={256}
-      minWidth={80}
-      maxWidth={320}
-      className="hidden md:flex flex-col bg-white border-r"
-    >
-      <div className={`flex-1 overflow-y-auto py-4 ${isOpen ? 'px-4' : 'px-2'}`}>
-        <div className="mb-8 flex items-center p-2">
-          <div className="bg-indigo-600 rounded-lg p-2">
-            <Utensils className="text-white w-6 h-6" />
-          </div>
-          {isOpen && (
-            <h2 className="ml-3 text-xl font-bold text-gray-800">Gourmet</h2>
-          )}
-        </div>
+    <>
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-20 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 transition-all duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
+        lg:sticky lg:top-16 lg:translate-x-0 lg:z-auto
+        ${isCollapsed ? 'lg:w-24' : 'lg:w-64'}
+        w-64
+        lg:h-[calc(100vh-4rem)]  // Height adjusted for header
+      `}>
         
-        <nav>
-          <ul className="space-y-1">
-            {navItems.map((item, index) => (
-              <NavItem 
-                key={index}
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                isOpen={isOpen}
-              />
-            ))}
-          </ul>
-        </nav>
-      </div>
-      
-      <div className={`p-4 border-t ${isOpen ? 'text-center' : ''}`}>
-        <p className="text-xs text-gray-500">
-          {isOpen ? '© 2023 GourmetExpress' : '©'}
-        </p>
-      </div>
-    </ResizablePanel>
+        <div className="flex flex-col h-full">
+          {/* Logo - Hidden when collapsed on desktop */}
+          {(!isCollapsed || isOpen) && (
+            <div className="p-6 border-b border-gray-200 lg:hidden">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gray-900 p-2 rounded-lg">
+                  <UtensilsCrossed className="text-white" size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">FoodieExpress</h2>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="flex-1 py-6">
+            <ul className="space-y-4 px-3">
+              {menuItems.map((item, index) => (
+                <NavItem
+                  key={index}
+                  icon={item.icon}
+                  label={item.label}
+                  href={item.href}
+                  active={activeItem === item.href}
+                  onClick={onItemClick}
+                  isCollapsed={isCollapsed && !isOpen}
+                />
+              ))}
+            </ul>
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 };
 

@@ -1,29 +1,60 @@
-import React, { useState } from 'react';
-import { ChevronDown, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronDown, Settings } from 'lucide-react';
 
-const UserProfile = ({ name, email, avatarUrl }) => {
-  const [isOpen, setIsOpen] = useState(false);
+// Common UI Constants
+const COMMON_BUTTON_CLASSES = 'flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors';
+const AVATAR_CONTAINER_CLASSES = 'w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center';
+const USER_NAME_CLASSES = 'text-gray-700 font-medium hidden sm:block';
+const DROPDOWN_MENU_CLASSES = 'absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10';
+const DROPDOWN_HEADER_CLASSES = 'px-4 py-2 border-b border-gray-100';
+const DROPDOWN_ITEM_CLASSES = 'block px-4 py-2 transition-colors';
+const REGULAR_ITEM_CLASSES = `${DROPDOWN_ITEM_CLASSES} text-gray-700 hover:bg-gray-50`;
+const LOGOUT_ITEM_CLASSES = `${DROPDOWN_ITEM_CLASSES} text-red-600 hover:bg-red-50`;
+
+const UserProfile = ({ name, email }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    if (showDropdown) {
+      const handleClick = () => setShowDropdown(false);
+      document.addEventListener('click', handleClick);
+      return () => document.removeEventListener('click', handleClick);
+    }
+  }, [showDropdown]);
 
   return (
     <div className="relative">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 focus:outline-none"
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowDropdown(!showDropdown);
+        }}
+        className={COMMON_BUTTON_CLASSES}
       >
-        <div className="bg-gray-200 border-2 border-dashed rounded-xl w-8 h-8" />
-        <div className="hidden md:block text-left">
-          <p className="text-sm font-medium text-gray-700 truncate max-w-[120px]">{name}</p>
-          <p className="text-xs text-gray-500 truncate max-w-[120px]">{email}</p>
+        <div className={AVATAR_CONTAINER_CLASSES}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </div>
-        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <span className={USER_NAME_CLASSES}>{name}</span>
+        <ChevronDown size={14} className="text-gray-500" />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20">
-          <button className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </button>
+      {showDropdown && (
+        <div className={DROPDOWN_MENU_CLASSES} onClick={(e) => e.stopPropagation()}>
+          <div className={DROPDOWN_HEADER_CLASSES}>
+            <p className="font-medium text-gray-800">{name}</p>
+            <p className="text-sm text-gray-500">{email}</p>
+          </div>
+          <a href="#" className={REGULAR_ITEM_CLASSES}>
+            <Settings size={16} className="inline mr-2" />
+            Profile & Settings
+          </a>
+          <hr className="my-2" />
+          <a href="#" className={LOGOUT_ITEM_CLASSES}>
+            Logout
+          </a>
         </div>
       )}
     </div>
