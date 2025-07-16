@@ -1,4 +1,4 @@
-import { UtensilsCrossed, MapPin, Phone, Mail,} from 'lucide-react';
+import { UtensilsCrossed, MapPin, Phone, Mail } from 'lucide-react';
 
 const CONTACT_ICONS_CLASS = 'flex items-center space-x-2';
 const QUICK_LINKS_CLASS = 'text-gray-400 hover:text-white transition-colors';

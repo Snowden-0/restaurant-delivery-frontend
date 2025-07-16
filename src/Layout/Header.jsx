@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Menu, X, UtensilsCrossed, Search, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useState } from 'react';
+import { X, UtensilsCrossed, Search} from 'lucide-react';
 import UserProfile from './UserProfile';
 
 // Common UI Constants
@@ -14,29 +14,14 @@ const INNER_CONTAINER_CLASSES = 'flex items-center justify-between px-4 py-3';
 const LOGO_CONTAINER_CLASSES = 'bg-gray-900 p-2 rounded-lg flex items-center justify-center';
 const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 
-const Header = ({ onToggleSidebar, isSidebarOpen, onToggleSidebarCollapse, isSidebarCollapsed }) => {
+const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   return (
     <header className={`${HEADER_CLASSES} h-20`}>
       <div className={INNER_CONTAINER_CLASSES}>
         {/* Left Section */}
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={onToggleSidebar}
-            className={`${COMMON_BUTTON_CLASSES} lg:hidden`}
-          >
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
-          {/* Desktop sidebar collapse button */}
-          <button
-            onClick={onToggleSidebarCollapse}
-            className={`${COMMON_BUTTON_CLASSES} hidden lg:flex`}
-          >
-            {isSidebarCollapsed ? <PanelLeftOpen size={24} /> : <PanelLeftClose size={24} />}
-          </button>
-          
+        <div className="flex items-center space-x-4">  
           <div className="flex items-center space-x-2">
             <div className={LOGO_CONTAINER_CLASSES}>
               <UtensilsCrossed className="text-white" size={28} />
