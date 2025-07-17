@@ -5,7 +5,7 @@ import { MapPin, Clock, Star, ChefHat } from 'lucide-react';
 
 const RestaurantCard = ({ restaurant }) => {
   const navigate = useNavigate();
-  const { id, name, is_available, address, rating, image_url } = restaurant;
+  const { id, name, is_available, address, image_url } = restaurant;
 
   const handleViewDetails = () => {
     navigate(`/restaurants/${id}`);
@@ -20,10 +20,6 @@ const RestaurantCard = ({ restaurant }) => {
           alt={name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute top-3 right-3 bg-white bg-opacity-90 backdrop-blur-sm rounded-full p-2 flex items-center space-x-1 shadow-md">
-          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-          <span className="text-sm font-medium text-gray-700">{rating}</span>
-        </div>
       </div>
 
       {/* Card Content */}

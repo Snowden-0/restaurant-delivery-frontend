@@ -18,7 +18,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/restaurants" replace />} />
             <Route path="/restaurants" element={<RestaurantListView />} />
-            <Route path="/restaurant/:id" element={<RestaurantDetailsView />} />
+            <Route path="/restaurants/:id" element={<RestaurantDetailsView />} />
           </Routes>
         </Layout>
       </Router>
