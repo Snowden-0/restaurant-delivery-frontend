@@ -40,5 +40,15 @@ export const restaurantService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to fetch menu');
     }
+  },
+  
+  getRestaurantCuisines: async (restaurantId) => {
+    try {
+      const response = await api.get(`/api/restaurants/${restaurantId}/cuisines`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch cuisines');
+    }
   }
 };
+
