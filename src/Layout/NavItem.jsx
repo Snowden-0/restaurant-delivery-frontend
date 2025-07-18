@@ -1,5 +1,3 @@
-import React from 'react';
-
 const NavItem = ({ icon: Icon, label, href, active, onClick, isCollapsed }) => {
   const handleClick = (e) => {
     e.preventDefault();

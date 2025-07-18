@@ -1,84 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+//import { AuthProvider } from './contexts/AuthContext';
+import Layout from './Layout/Layout';
 import LoginPage from './views/user/LoginPage';
 import SignupPage from './views/user/SignupPage';
-import HomePage from './views/HomePage';
-import * as authService from './services/authServices';
+import RestaurantListView from './views/RestaurantListView';
+import RestaurantDetailsView from './views/RestaurantDetailsView';
+import { RestaurantProvider } from './context/RestaurantContext';
 import ErrorPopup from './components/ui/ErrorPopup';
-import  Layout  from './Layout/Layout';
-
-const MAIN_DIV_CLASS = 'min-h-screen flex items-center justify-center bg-gray-900';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Check authentication status on mount
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsAuthenticated(!!token);
-  }, []);
-
-  const handleAuth = async (formData, type) => {
-    try {
-      if (type === 'login') {
-        await authService.login(formData.email, formData.password);
-      } else {
-        await authService.signup(formData);
-      }
-      setIsAuthenticated(true);
-      setError(null);
-    } catch (err) {
-      setError(err.message || `${type} failed`);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsAuthenticated(false);
-  };
-
   return (
-    // <div className={MAIN_DIV_CLASS}>
-    //   {error && <ErrorPopup message={error} onClose={() => setError(null)} />}
-    //   <Router>
-    //     <Routes>
-    //       <Route 
-    //         path="/" 
-    //         element={
-    //           isAuthenticated ? 
-    //             <HomePage onLogout={handleLogout} /> : 
-    //             <Navigate to="/login" replace />
-    //         } 
-    //       />
-    //       <Route 
-    //         path="/login" 
-    //         element={
-    //           !isAuthenticated ? 
-    //             <LoginPage onLogin={(data) => handleAuth(data, 'login')} /> : 
-    //             <Navigate to="/" replace />
-    //         } 
-    //       />
-    //       <Route 
-    //         path="/signup" 
-    //         element={
-    //           !isAuthenticated ? 
-    //             <SignupPage onSignup={(data) => handleAuth(data, 'signup')} /> : 
-    //             <Navigate to="/" replace />
-    //         } 
-    //       />
-    //     </Routes>
-    //   </Router>
-    //</div>
-    <div>
-      <Layout>
-      {/* Your page content will go here */}
-      <div className="text-center text-gray-500 py-20">
-        <p className="text-lg">Main content area - ready for your components</p>
-      </div>
-    </Layout>
-      
-    </div>
+    <>
+    <RestaurantProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Navigate to="/restaurants" replace />} />
+            <Route path="/restaurants" element={<RestaurantListView />} />
+            <Route path="/restaurants/:id" element={<RestaurantDetailsView />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </RestaurantProvider>
+    </>
+    
   );
 }
 
