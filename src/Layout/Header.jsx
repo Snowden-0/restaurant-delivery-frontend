@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { X, UtensilsCrossed, Search, ShoppingCart } from 'lucide-react'; // Import ShoppingCart
+import { X, UtensilsCrossed, Search } from 'lucide-react';
 import UserProfile from './UserProfile';
 import { useRestaurant } from '../context/RestaurantContext';
-import { useCart } from '../context/CartContext'; // Import useCart
+import Cart from '../components/ui/Cart'; // Import the new Cart component
 
 // ... (constants can remain the same)
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -18,7 +18,6 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { searchTerm, setSearchTerm } = useRestaurant();
-  const { totalItems } = useCart(); // Get totalItems from cart context
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -84,18 +83,8 @@ const Header = () => {
             </button>
           )}
 
-          {/* Cart Icon */}
-          <button
-            className={`${COMMON_BUTTON_CLASSES} relative`}
-            aria-label="View cart"
-          >
-            <ShoppingCart size={24} className="text-gray-600" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </button>
+          {/* Cart Component */}
+          <Cart /> {/* Render the new Cart component here */}
 
           {/* User Profile */}
           <UserProfile/>
