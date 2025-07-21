@@ -20,13 +20,6 @@ const RestaurantDetailsView = () => {
     }
   }, [id, getRestaurantById]);
 
-  // Static menu data - this will eventually be fetched from an API
-  const menuItems = [
-    { id: 1, name: 'Margherita Pizza', description: 'Classic pizza with fresh mozzarella, tomatoes, and basil.', price: '$14.99' },
-    { id: 2, name: 'Pasta Carbonara', description: 'Creamy pasta with pancetta, egg yolk, and parmesan cheese.', price: '$18.50' },
-    { id: 3, name: 'Tiramisu', description: 'A coffee-flavored Italian dessert.', price: '$8.00' },
-  ];
-
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen flex items-center justify-center">
@@ -51,7 +44,7 @@ const RestaurantDetailsView = () => {
     );
   }
 
-  const { name, phone, description, address, image_url, is_available } = selectedRestaurant;
+  const { name, phone, description, address, image_url, is_available, menu } = selectedRestaurant;
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -69,7 +62,7 @@ const RestaurantDetailsView = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <RestaurantAbout name={name} description={description} />
-            <RestaurantMenu menuItems={menuItems} />
+            <RestaurantMenu menuItems={menu || []} />
           </div>
           <RestaurantInfoSidebar address={address} phone={phone} />
         </div>

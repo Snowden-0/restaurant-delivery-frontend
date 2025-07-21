@@ -1,6 +1,14 @@
 // services/restaurantService.js
 import api from '../utils/api';
 
+// Error message constants
+const ERROR_FETCH_RESTAURANTS = 'Failed to fetch restaurants';
+const ERROR_FETCH_RESTAURANT_DETAILS = 'Failed to fetch restaurant details and menu';
+const ERROR_SEARCH_RESTAURANTS = 'Failed to search restaurants';
+const ERROR_FETCH_MENU = 'Failed to fetch menu';
+const ERROR_FETCH_CUISINES = 'Failed to fetch cuisines';
+const ERROR_FETCH_ALL_CUISINES = 'Failed to fetch all cuisines';
+
 export const restaurantService = {
   // Get all restaurants
   getAllRestaurants: async () => {
@@ -8,7 +16,7 @@ export const restaurantService = {
       const response = await api.get('/api/restaurants');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch restaurants');
+      throw new Error(error.response?.data?.message || ERROR_FETCH_RESTAURANTS);
     }
   },
 
@@ -18,7 +26,7 @@ export const restaurantService = {
       const response = await api.get(`/api/restaurants/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch restaurant details');
+      throw new Error(error.response?.data?.message || ERROR_FETCH_RESTAURANT_DETAILS);
     }
   },
 
@@ -28,7 +36,7 @@ export const restaurantService = {
       const response = await api.get(`/restaurants/search?q=${query}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to search restaurants');
+      throw new Error(error.response?.data?.message || ERROR_SEARCH_RESTAURANTS);
     }
   },
 
@@ -38,7 +46,7 @@ export const restaurantService = {
       const response = await api.get(`/api/restaurants/${restaurantId}/menu`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch menu');
+      throw new Error(error.response?.data?.message || ERROR_FETCH_MENU);
     }
   },
   
@@ -47,17 +55,16 @@ export const restaurantService = {
       const response = await api.get(`/api/restaurants/${restaurantId}/cuisines`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch cuisines');
+      throw new Error(error.response?.data?.message || ERROR_FETCH_CUISINES);
     }
   },
 
   getAllCuisines: async () => {
     try {
-      const response = await api.get('/api/cuisines'); // Assuming this endpoint
+      const response = await api.get('/api/cuisines');
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch all cuisines');
+      throw new Error(error.response?.data?.message || ERROR_FETCH_ALL_CUISINES);
     }
   },
 };
-
