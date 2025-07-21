@@ -1,9 +1,8 @@
-// components/Header.jsx
 import { useState } from 'react';
-import { X, UtensilsCrossed, Search} from 'lucide-react';
+import { X, UtensilsCrossed, Search, ShoppingCart } from 'lucide-react'; // Import ShoppingCart
 import UserProfile from './UserProfile';
-// 1. Import the useRestaurant hook
 import { useRestaurant } from '../context/RestaurantContext';
+import { useCart } from '../context/CartContext'; // Import useCart
 
 // ... (constants can remain the same)
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -18,10 +17,9 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  // 2. Get searchTerm and setSearchTerm from the context
   const { searchTerm, setSearchTerm } = useRestaurant();
+  const { totalItems } = useCart(); // Get totalItems from cart context
 
-  // 3. Create a handler for the input change
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -48,7 +46,6 @@ const Header = () => {
               type="text"
               placeholder="Search by restaurant name..."
               className={`${INPUT_BASE_CLASSES} pr-4`}
-              // 4. Connect the input to the context state
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -63,7 +60,6 @@ const Header = () => {
                 placeholder="Search..."
                 className={`${INPUT_BASE_CLASSES} pr-10`}
                 autoFocus
-                // 5. Connect the mobile input as well
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -87,6 +83,20 @@ const Header = () => {
               <Search size={18} className="text-gray-600" />
             </button>
           )}
+
+          {/* Cart Icon */}
+          <button
+            className={`${COMMON_BUTTON_CLASSES} relative`}
+            aria-label="View cart"
+          >
+            <ShoppingCart size={24} className="text-gray-600" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </button>
+
           {/* User Profile */}
           <UserProfile/>
         </div>

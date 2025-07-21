@@ -8,11 +8,13 @@ import RestaurantListView from './views/RestaurantListView';
 import RestaurantDetailsView from './views/RestaurantDetailsView';
 import { RestaurantProvider } from './context/RestaurantContext';
 import ErrorPopup from './components/ui/ErrorPopup';
+import { CartProvider } from './context/CartContext'; 
 
 function App() {
   return (
     <>
     <RestaurantProvider>
+      <CartProvider>
       <Router>
         <Layout>
           <Routes>
@@ -22,6 +24,7 @@ function App() {
           </Routes>
         </Layout>
       </Router>
+      </CartProvider>
     </RestaurantProvider>
     </>
     
