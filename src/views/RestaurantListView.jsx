@@ -55,6 +55,15 @@ const RestaurantListView = () => {
           ))}
         </div>
 
+        {/* 1. Improved message for when no results are found */}
+        {!loading && restaurants.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">
+              No restaurants found matching your search.
+            </p>
+          </div>
+        )}
+
         {restaurants.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-600">No restaurants found.</p>

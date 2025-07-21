@@ -49,6 +49,15 @@ export const restaurantService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to fetch cuisines');
     }
-  }
+  },
+
+  getAllCuisines: async () => {
+    try {
+      const response = await api.get('/api/cuisines'); // Assuming this endpoint
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch all cuisines');
+    }
+  },
 };
 
