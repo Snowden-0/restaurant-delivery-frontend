@@ -2,8 +2,6 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useRestaurant } from '../context/RestaurantContext';
-
-// Import the new modular components
 import RestaurantHeader from '../components/ui/RestaurantHeader';
 import RestaurantAbout from '../components/ui/RestaurantAbout';
 import RestaurantMenu from '../components/ui/RestaurantMenu';
@@ -47,27 +45,29 @@ const RestaurantDetailsView = () => {
   const { name, phone, description, address, image_url, is_available, menu } = selectedRestaurant;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <button
-          onClick={() => navigate('/restaurants')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 font-medium"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back to All Restaurants</span>
-        </button>
+    // Wrap the main content with CartProvider
+      <div className="bg-gray-50 min-h-screen">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <button
+            onClick={() => navigate('/restaurants')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to All Restaurants</span>
+          </button>
 
-        <RestaurantHeader name={name} imageUrl={image_url} isAvailable={is_available} />
+          <RestaurantHeader name={name} imageUrl={image_url} isAvailable={is_available} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <RestaurantAbout name={name} description={description} />
-            <RestaurantMenu menuItems={menu || []} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <RestaurantAbout name={name} description={description} />
+              <RestaurantMenu menuItems={menu || []} />
+            </div>
+            <RestaurantInfoSidebar address={address} phone={phone} />
           </div>
-          <RestaurantInfoSidebar address={address} phone={phone} />
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    
   );
 };
 

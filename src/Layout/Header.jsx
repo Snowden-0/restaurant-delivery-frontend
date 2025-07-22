@@ -1,9 +1,9 @@
-// components/Header.jsx
 import { useState } from 'react';
-import { X, UtensilsCrossed, Search} from 'lucide-react';
+import { X, UtensilsCrossed, Search } from 'lucide-react';
 import UserProfile from './UserProfile';
-// 1. Import the useRestaurant hook
 import { useRestaurant } from '../context/RestaurantContext';
+import Cart from '../components/ui/Cart'; // Import the new Cart component
+import { Link } from 'react-router';
 
 // ... (constants can remain the same)
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -18,10 +18,8 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  // 2. Get searchTerm and setSearchTerm from the context
   const { searchTerm, setSearchTerm } = useRestaurant();
 
-  // 3. Create a handler for the input change
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -30,12 +28,17 @@ const Header = () => {
     <header className={`${HEADER_CLASSES} h-20`}>
       <div className={INNER_CONTAINER_CLASSES}>
         {/* Left Section */}
-        <div className="flex items-center space-x-4">  
+        <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className={LOGO_CONTAINER_CLASSES}>
+              <Link to={"/"}>
               <UtensilsCrossed className="text-white" size={28} />
+              </Link>
+              
             </div>
-            <h1 className={TITLE_CLASSES}>FoodieExpress</h1>
+            <Link to="/" className={TITLE_CLASSES}>
+              FoodieExpress
+            </Link>
           </div>
         </div>
 
@@ -48,7 +51,6 @@ const Header = () => {
               type="text"
               placeholder="Search by restaurant name..."
               className={`${INPUT_BASE_CLASSES} pr-4`}
-              // 4. Connect the input to the context state
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -63,7 +65,6 @@ const Header = () => {
                 placeholder="Search..."
                 className={`${INPUT_BASE_CLASSES} pr-10`}
                 autoFocus
-                // 5. Connect the mobile input as well
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -87,8 +88,10 @@ const Header = () => {
               <Search size={18} className="text-gray-600" />
             </button>
           )}
+          {/* Cart Component */}
+          <Cart /> {/* Render the new Cart component here */}
           {/* User Profile */}
-          <UserProfile/>
+          <UserProfile />
         </div>
       </div>
     </header>
