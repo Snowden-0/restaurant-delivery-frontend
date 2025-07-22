@@ -9,6 +9,7 @@ import RestaurantDetailsView from './views/RestaurantDetailsView';
 import { RestaurantProvider } from './context/RestaurantContext';
 import ErrorPopup from './components/ui/ErrorPopup';
 import { CartProvider } from './context/CartContext'; 
+import CartDetailView from './views/CartDetailView';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/" element={<Navigate to="/restaurants" replace />} />
             <Route path="/restaurants" element={<RestaurantListView />} />
             <Route path="/restaurants/:id" element={<RestaurantDetailsView />} />
+            <Route path="/cart-details" element={<CartDetailView />} />
           </Routes>
         </Layout>
       </Router>

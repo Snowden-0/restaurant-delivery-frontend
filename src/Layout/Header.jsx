@@ -3,6 +3,7 @@ import { X, UtensilsCrossed, Search } from 'lucide-react';
 import UserProfile from './UserProfile';
 import { useRestaurant } from '../context/RestaurantContext';
 import Cart from '../components/ui/Cart'; // Import the new Cart component
+import { Link } from 'react-router';
 
 // ... (constants can remain the same)
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -27,12 +28,17 @@ const Header = () => {
     <header className={`${HEADER_CLASSES} h-20`}>
       <div className={INNER_CONTAINER_CLASSES}>
         {/* Left Section */}
-        <div className="flex items-center space-x-4">  
+        <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className={LOGO_CONTAINER_CLASSES}>
+              <Link to={"/"}>
               <UtensilsCrossed className="text-white" size={28} />
+              </Link>
+              
             </div>
-            <h1 className={TITLE_CLASSES}>FoodieExpress</h1>
+            <Link to="/" className={TITLE_CLASSES}>
+              FoodieExpress
+            </Link>
           </div>
         </div>
 
@@ -82,12 +88,10 @@ const Header = () => {
               <Search size={18} className="text-gray-600" />
             </button>
           )}
-
           {/* Cart Component */}
           <Cart /> {/* Render the new Cart component here */}
-
           {/* User Profile */}
-          <UserProfile/>
+          <UserProfile />
         </div>
       </div>
     </header>
