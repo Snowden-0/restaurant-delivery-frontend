@@ -4,7 +4,7 @@ import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 
-const SignupForm = ({ onSignup }) => {
+const SignupForm = () => {
   
   const { signup } = useAuth(); 
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ const SignupForm = ({ onSignup }) => {
       setErrors({});
       try {
         await signup(formData);
-        navigate('/restaurants');
+        navigate('/login');
       } catch (error) {
         console.error("Signup failed:", error);
       }

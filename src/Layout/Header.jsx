@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { X, UtensilsCrossed, Search } from 'lucide-react';
 import UserProfile from './UserProfile';
 import { useRestaurant } from '../context/RestaurantContext';
-import Cart from '../components/ui/Cart'; // Import the new Cart component
+import Cart from '../components/ui/Cart'; 
 import { Link } from 'react-router';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
-import Button from '../components/ui/Button'; // Import the Button component
+import { useAuth } from '../context/AuthContext';
+import Button from '../components/ui/Button'; 
 
-// ... (constants can remain the same)
+
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
 const INPUT_BASE_CLASSES = 'w-full pl-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all';
 const SEARCH_ICON_CLASSES = 'absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400';
@@ -21,7 +21,7 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { searchTerm, setSearchTerm } = useRestaurant();
-  const { isAuthenticated } = useAuth(); // Use isAuthenticated from AuthContext
+  const { isAuthenticated } = useAuth();
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -91,12 +91,11 @@ const Header = () => {
               <Search size={18} className="text-gray-600" />
             </button>
           )}
-          {/* Cart Component */}
-          <Cart /> {/* Render the new Cart component here */}
-          {/* User Profile */}
-          <UserProfile />
+          
+          <Cart />
+          
+          {isAuthenticated && <UserProfile />}
 
-          {/* Login Button - Conditionally rendered */}
           {!isAuthenticated && (
             <Link to="/login">
               <Button>Login</Button>

@@ -13,29 +13,49 @@ export const useAuth = () => {
     return context;
 };
 
+const decodeJwt = (token) => {
+    try {
+        const base64Url = token.split('.')[1] || token;
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error("Failed to decode token:", error);
+        return null;
+    }
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true); // Used to check for a token on initial load
+    const [isLoading, setIsLoading] = useState(true); 
     const [error, setError] = useState(null);
 
-    // Check for an authentication token on initial load
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
-            setIsAuthenticated(true);
+            const decodedUser = decodeJwt(token); 
+            if (decodedUser && decodedUser.name && decodedUser.email) {
+                setUser(decodedUser);
+                setIsAuthenticated(true);
+            } else {
+                localStorage.removeItem('authToken');
+                setIsAuthenticated(false);
+                setUser(null);
+            }
         }
         setIsLoading(false);
     }, []);
-
-    // --- Authentication Logic ---
 
     const handleLogin = async (formData) => {
         try {
             setError(null); 
             const data = await authLogin(formData.email, formData.password);
+            localStorage.setItem('authToken', data.token); 
             setIsAuthenticated(true);
-            // setUser(data.user); 
+            setUser(data.user); 
             return data; 
         } catch (error) {
             setError(error.message ||  "Login failed");
@@ -46,7 +66,11 @@ export const AuthProvider = ({ children }) => {
     const handleSignup = async (userData) => {
         try {
             setError(null);
+            
             const data = await authSignup(userData);
+            localStorage.setItem('authToken', data.token); 
+            setIsAuthenticated(true);
+            setUser(data.user);
             return data;
         } catch (error) {
             setError(error.message ||  "Login failed");
@@ -78,4 +102,3 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-
