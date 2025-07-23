@@ -4,6 +4,8 @@ import UserProfile from './UserProfile';
 import { useRestaurant } from '../context/RestaurantContext';
 import Cart from '../components/ui/Cart'; // Import the new Cart component
 import { Link } from 'react-router';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
+import Button from '../components/ui/Button'; // Import the Button component
 
 // ... (constants can remain the same)
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -19,6 +21,7 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { searchTerm, setSearchTerm } = useRestaurant();
+  const { isAuthenticated } = useAuth(); // Use isAuthenticated from AuthContext
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -92,6 +95,13 @@ const Header = () => {
           <Cart /> {/* Render the new Cart component here */}
           {/* User Profile */}
           <UserProfile />
+
+          {/* Login Button - Conditionally rendered */}
+          {!isAuthenticated && (
+            <Link to="/login">
+              <Button>Login</Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

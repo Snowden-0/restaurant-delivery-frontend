@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext'; // Adjust path as needed
 import { useRestaurant } from '../context/RestaurantContext'; // Adjust path as needed
+import { useAuth } from '../context/AuthContext'; // Adjust path as needed
 import {
   ArrowLeft,
   ShoppingCart,
@@ -18,11 +19,13 @@ import {
   Trash2,
 } from 'lucide-react';
 
+ 
+
 const CartDetailsView = () => {
   const navigate = useNavigate();
   const { cartItems, totalItems, totalPrice, removeItemFromCart, addItemToCart, clearCart } = useCart();
   const { selectedRestaurant } = useRestaurant(); // Assuming selectedRestaurant holds details of the current restaurant
-
+  const {isAuthenticated} = useAuth();
 
   const handleUpdateQuantity = (item, type) => {
     if (type === 'increase') {
@@ -33,6 +36,27 @@ const CartDetailsView = () => {
   };
 
   const calculateSubtotal = (item) => (item.quantity * parseFloat(item.price)).toFixed(2);
+
+  const handleCloseCart = () => {
+    setIsCartOpen(false);
+  };
+
+  const handleNavigation = (path) => {
+    if(path === '/checkout'){
+
+      if(!isAuthenticated){ 
+        navigate('/login');
+        handleCloseCart();
+        return;
+      } else {
+        navigate(path);
+        handleCloseCart();
+      }
+    } else {
+      navigate(path);
+      handleCloseCart();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-8 px-4 sm:px-6 lg:px-8">
@@ -168,7 +192,7 @@ const CartDetailsView = () => {
               Clear Cart
             </button>
             <button
-              onClick={() => navigate('/checkout')} // Route to your checkout page
+              onClick={() => handleNavigation('/checkout')}
               disabled={totalItems === 0}
               className={`w-full sm:w-auto flex-grow px-6 py-3 bg-gray-800 text-white rounded-lg shadow-md hover:bg-gray-900 transition-colors transform font-semibold text-lg flex items-center justify-center
                           ${totalItems === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
