@@ -40,8 +40,7 @@ const Cart = () => {
   const handleNavigation = (path) => {
     if(path === '/checkout'){
 
-      if(isAuthenticated === false){
-        alert("Please login to proceed to checkout.");  
+      if(isAuthenticated === false){ 
         navigate('/login');
         handleCloseCart();
         return;
