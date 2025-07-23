@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
+import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 const SignupForm = ({ onSignup }) => {
   
-  const { signup } = useAuth(); // Get the signup function from context
+  const { signup } = useAuth(); 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
     name: '',
@@ -49,7 +49,6 @@ const SignupForm = ({ onSignup }) => {
       setErrors({});
       try {
         await signup(formData);
-        // Navigate to login page after successful signup
         navigate('/restaurants');
       } catch (error) {
         console.error("Signup failed:", error);
