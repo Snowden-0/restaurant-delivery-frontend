@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, XCircle, Trash2, Plus, Minus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
 
 const Cart = () => {
   const { cartItems, totalItems, totalPrice, removeItemFromCart } = useCart();
@@ -9,6 +10,7 @@ const Cart = () => {
   const dropdownRef = useRef(null);
   const cartButtonRef = useRef(null);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth(); // Get authentication status from context
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -36,8 +38,21 @@ const Cart = () => {
   };
 
   const handleNavigation = (path) => {
-    navigate(path);
-    handleCloseCart();
+    if(path === '/checkout'){
+
+      if(isAuthenticated === false){
+        alert("Please login to proceed to checkout.");  
+        navigate('/login');
+        handleCloseCart();
+        return;
+      } else {
+        navigate(path);
+        handleCloseCart();
+      }
+    } else {
+      navigate(path);
+      handleCloseCart();
+    }
   };
 
   return (
