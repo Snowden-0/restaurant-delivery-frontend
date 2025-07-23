@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
 
-const LoginForm = ({ onLogin }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+const LoginForm = () => { 
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: '', password: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin(formData);
+    try {
+      await login(formData);
+      navigate('/restaurants');
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   return (
