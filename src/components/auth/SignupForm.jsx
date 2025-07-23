@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const SignupForm = ({ onSignup }) => {
-  const [formData, setFormData] = useState({
+  
+  const { signup } = useAuth(); // Get the signup function from context
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ 
     name: '',
     email: '',
     password: '',
     phone_number: '',
-    address: '',
+    address: '' 
   });
-
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -36,14 +40,20 @@ const SignupForm = ({ onSignup }) => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      setErrors({}); // Clear errors if validation passes
-      onSignup(formData);
+      setErrors({});
+      try {
+        await signup(formData);
+        // Navigate to login page after successful signup
+        navigate('/restaurants');
+      } catch (error) {
+        console.error("Signup failed:", error);
+      }
     }
   };
 
