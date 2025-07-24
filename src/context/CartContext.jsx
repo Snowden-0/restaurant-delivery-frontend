@@ -23,6 +23,7 @@ export const CartProvider = ({ children }) => {
 
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Effect to update total items and total price whenever cartItems changes
   useEffect(() => {
@@ -84,6 +85,8 @@ export const CartProvider = ({ children }) => {
     totalItems,
     totalPrice,
     addItemToCart,
+    isCartOpen,
+    setIsCartOpen,
     removeItemFromCart,
     clearCart,
   };

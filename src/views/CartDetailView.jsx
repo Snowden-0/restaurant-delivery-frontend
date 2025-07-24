@@ -23,7 +23,7 @@ import {
 
 const CartDetailsView = () => {
   const navigate = useNavigate();
-  const { cartItems, totalItems, totalPrice, removeItemFromCart, addItemToCart, clearCart } = useCart();
+  const { cartItems, totalItems, setIsCartOpen, totalPrice, removeItemFromCart, addItemToCart, clearCart } = useCart();
   const { selectedRestaurant } = useRestaurant(); // Assuming selectedRestaurant holds details of the current restaurant
   const {isAuthenticated} = useAuth();
 

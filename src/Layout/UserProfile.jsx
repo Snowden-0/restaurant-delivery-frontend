@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Settings } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router'; 
+import ConfirmationModal from '../components/ui/ConfirmationModal'; 
 
-// Common UI Constants
 const COMMON_BUTTON_CLASSES = 'flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors';
 const AVATAR_CONTAINER_CLASSES = 'w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center';
 const USER_NAME_CLASSES = 'text-gray-700 font-medium hidden sm:block';
@@ -11,8 +13,14 @@ const DROPDOWN_ITEM_CLASSES = 'block px-4 py-2 transition-colors';
 const REGULAR_ITEM_CLASSES = `${DROPDOWN_ITEM_CLASSES} text-gray-700 hover:bg-gray-50`;
 const LOGOUT_ITEM_CLASSES = `${DROPDOWN_ITEM_CLASSES} text-red-600 hover:bg-red-50`;
 
-const UserProfile = ({ name, email }) => {
+const UserProfile = () => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false); 
+  const { user, logout } = useAuth(); 
+
+  
+  const userName = user?.name;
+  const userEmail = user?.email;
 
   useEffect(() => {
     if (showDropdown) {
@@ -21,6 +29,15 @@ const UserProfile = ({ name, email }) => {
       return () => document.removeEventListener('click', handleClick);
     }
   }, [showDropdown]);
+
+  const handleLogoutConfirm = () => {
+    logout(); 
+    setShowLogoutModal(false); 
+    setShowDropdown(false); 
+  };
+
+  const fullName = userName;
+  const firstName = userName ? fullName.split(" ")[0] : '';
 
   return (
     <div className="relative">
@@ -37,26 +54,35 @@ const UserProfile = ({ name, email }) => {
             <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
-        <span className={USER_NAME_CLASSES}>{name}</span>
+        <span className={USER_NAME_CLASSES}>{firstName}</span>
         <ChevronDown size={14} className="text-gray-500" />
       </button>
 
       {showDropdown && (
         <div className={DROPDOWN_MENU_CLASSES} onClick={(e) => e.stopPropagation()}>
           <div className={DROPDOWN_HEADER_CLASSES}>
-            <p className="font-medium text-gray-800">{name}</p>
-            <p className="text-sm text-gray-500">{email}</p>
+            {firstName && <p className="font-medium text-gray-800">{firstName}</p>}
+            {userEmail && <p className="text-sm text-gray-500">{userEmail}</p>}
           </div>
-          <a href="#" className={REGULAR_ITEM_CLASSES}>
+          <Link to="/profile" className={REGULAR_ITEM_CLASSES}>
             <Settings size={16} className="inline mr-2" />
             Profile & Settings
-          </a>
+          </Link>
           <hr className="my-2" />
-          <a href="#" className={LOGOUT_ITEM_CLASSES}>
+          <button
+            onClick={() => setShowLogoutModal(true)} 
+            className={LOGOUT_ITEM_CLASSES + " w-full text-left"} 
+          >
             Logout
-          </a>
+          </button>
         </div>
       )}
+
+      {showLogoutModal && <ConfirmationModal
+        message="Are you sure you want to log out?"
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setShowLogoutModal(false)}
+      />}
     </div>
   );
 };
