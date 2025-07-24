@@ -36,6 +36,9 @@ const UserProfile = () => {
     setShowDropdown(false); 
   };
 
+  const fullName = userName;
+  const firstName = fullName.split(" ")[0];
+
   return (
     <div className="relative">
       <button
@@ -51,14 +54,14 @@ const UserProfile = () => {
             <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
-        <span className={USER_NAME_CLASSES}>{userName}</span>
+        <span className={USER_NAME_CLASSES}>{firstName}</span>
         <ChevronDown size={14} className="text-gray-500" />
       </button>
 
       {showDropdown && (
         <div className={DROPDOWN_MENU_CLASSES} onClick={(e) => e.stopPropagation()}>
           <div className={DROPDOWN_HEADER_CLASSES}>
-            <p className="font-medium text-gray-800">{userName}</p>
+            <p className="font-medium text-gray-800">{firstName}</p>
             <p className="text-sm text-gray-500">{userEmail}</p>
           </div>
           <Link to="/profile" className={REGULAR_ITEM_CLASSES}>

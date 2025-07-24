@@ -5,8 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
 
 const Cart = () => {
-  const { cartItems, totalItems, totalPrice, removeItemFromCart } = useCart();
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { cartItems,isCartOpen, setIsCartOpen, totalItems, totalPrice, removeItemFromCart } = useCart();
   const dropdownRef = useRef(null);
   const cartButtonRef = useRef(null);
   const navigate = useNavigate();

@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './Layout/Layout';
 import LoginPage from './views/user/LoginPage';
@@ -8,11 +7,22 @@ import RestaurantListView from './views/RestaurantListView';
 import RestaurantDetailsView from './views/RestaurantDetailsView';
 import { RestaurantProvider } from './context/RestaurantContext';
 import ErrorPopup from './components/ui/ErrorPopup';
-import { CartProvider } from './context/CartContext'; 
+import { CartProvider } from './context/CartContext';
 import CartDetailView from './views/CartDetailView';
+import ProfilePage from './views/UserProfileView';
+// PrivateRoute component to protect routes
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth(); // Destructure isAuthenticated and isLoading
 
-
-const MAIN_DIV_CLASS = 'min-h-screen flex items-center justify-center bg-gray-900';
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <p className="text-lg text-gray-700">Loading application...</p>
+      </div>
+    );
+  }
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
 function App() {
   return (
@@ -20,41 +30,36 @@ function App() {
        <Router>
           <AuthProvider>
             <RestaurantProvider>
-              <CartProvider> 
+              <CartProvider>
                <AppContent />
               </CartProvider>
-            </RestaurantProvider> 
+            </RestaurantProvider>
           </AuthProvider>
-        </Router>  
-    
-
+        </Router>
     </>
-    
   );
 }
 
 function AppContent() {
-  const { error, clearError } = useAuth(); // Now useAuth is called within AuthProvider's scope
+  const { error, clearError } = useAuth(); 
 
   return (
     <>
       {error && <ErrorPopup message={error} onClose={clearError} />}
       <Routes>
           <Route element={<Layout />}>
+                {/* Protected Routes using PrivateRoute */}
                 <Route path="/" element={<Navigate to="/restaurants" replace />} />
                 <Route path="/restaurants" element={<RestaurantListView />} />
                 <Route path="/restaurants/:id" element={<RestaurantDetailsView />} />
                 <Route path="/cart-details" element={<CartDetailView />} />
+                <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           </Route>
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/signup' element={<SignupPage />} />
-            {/* Routes that use the Layout */}
-            
+                <Route path='/login' element={<LoginPage />} />
+                <Route path='/signup' element={<SignupPage />} />
         </Routes>
     </>
   );
 }
-
-
 
 export default App;
