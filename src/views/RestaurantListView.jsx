@@ -1,6 +1,6 @@
 import { useRestaurant } from '../context/RestaurantContext';
 import RestaurantCard from '../components/ui/RestaurantCard';
-import Pagination from '../components/ui/Pagination';
+import { Pagination } from 'antd';
 
 const RestaurantListView = () => {
   const { 
@@ -73,23 +73,6 @@ const RestaurantListView = () => {
               )}
             </div>
             
-            {/* Items per page selector */}
-            <div className="flex items-center gap-2">
-              <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
-                Show:
-              </label>
-              <select
-                id="itemsPerPage"
-                value={itemsPerPage}
-                onChange={(e) => changeItemsPerPage(Number(e.target.value))}
-                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              >
-                <option value={6}>6 per page</option>
-                <option value={9}>9 per page</option>
-                <option value={12}>12 per page</option>
-                <option value={18}>18 per page</option>
-              </select>
-            </div>
           </div>
         )}
         
@@ -100,14 +83,24 @@ const RestaurantListView = () => {
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
               ))}
             </div>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              itemsPerPage={itemsPerPage}
-              onPageChange={goToPage}
-              showInfo={true}
-            />
+            
+            {/* Ant Design Pagination Component */}
+            <div className="flex justify-center mt-8">
+              <Pagination
+                current={currentPage}
+                total={totalItems}
+                pageSize={itemsPerPage}
+                onChange={(page) => goToPage(page)}
+                onShowSizeChange={(current, size) => changeItemsPerPage(size)}
+                showSizeChanger={true}
+                pageSizeOptions={['6', '9', '12', '18']}
+                showQuickJumper={true}
+                showTotal={(total, range) => 
+                  `${range[0]}-${range[1]} of ${total} restaurants`
+                }
+                className="ant-pagination-custom"
+              />
+            </div>
           </>
         ) : (
           /* No results message */
