@@ -7,8 +7,6 @@ const CANCEL_BUTTON_CLASSES = 'px-4 py-2 rounded-md border border-gray-300 text-
 const CONFIRM_BUTTON_CLASSES = 'px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors';
 
 const ConfirmationModal = ({ isOpen, message, onConfirm, onCancel }) => {
-  if (!isOpen) return null;
-
   return (
     <div className={MODAL_OVERLAY_CLASSES}>
       <div className={MODAL_CONTAINER_CLASSES}>

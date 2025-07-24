@@ -78,12 +78,11 @@ const UserProfile = () => {
         </div>
       )}
 
-      <ConfirmationModal
-        isOpen={showLogoutModal}
+      {showLogoutModal && <ConfirmationModal
         message="Are you sure you want to log out?"
         onConfirm={handleLogoutConfirm}
         onCancel={() => setShowLogoutModal(false)}
-      />
+      />}
     </div>
   );
 };
