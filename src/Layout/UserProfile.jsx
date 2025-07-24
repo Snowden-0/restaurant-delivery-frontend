@@ -37,7 +37,7 @@ const UserProfile = () => {
   };
 
   const fullName = userName;
-  const firstName = fullName.split(" ")[0];
+  const firstName = userName ? fullName.split(" ")[0] : '';
 
   return (
     <div className="relative">
@@ -61,8 +61,8 @@ const UserProfile = () => {
       {showDropdown && (
         <div className={DROPDOWN_MENU_CLASSES} onClick={(e) => e.stopPropagation()}>
           <div className={DROPDOWN_HEADER_CLASSES}>
-            <p className="font-medium text-gray-800">{firstName}</p>
-            <p className="text-sm text-gray-500">{userEmail}</p>
+            {firstName && <p className="font-medium text-gray-800">{firstName}</p>}
+            {userEmail && <p className="text-sm text-gray-500">{userEmail}</p>}
           </div>
           <Link to="/profile" className={REGULAR_ITEM_CLASSES}>
             <Settings size={16} className="inline mr-2" />

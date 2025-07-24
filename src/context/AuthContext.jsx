@@ -54,8 +54,9 @@ export const AuthProvider = ({ children }) => {
             setError(null); 
             const data = await authLogin(formData.email, formData.password);
             localStorage.setItem('authToken', data.token); 
+            const decodeUser = decodeJwt(data.token)
+            setUser(decodeUser); 
             setIsAuthenticated(true);
-            setUser(data.user); 
             return data; 
         } catch (error) {
             setError(error.message ||  "Login failed");
@@ -69,8 +70,9 @@ export const AuthProvider = ({ children }) => {
             
             const data = await authSignup(userData);
             localStorage.setItem('authToken', data.token); 
+            const decodedUser = decodeJwt(data.token);
+            setUser(decodedUser);
             setIsAuthenticated(true);
-            setUser(data.user);
             return data;
         } catch (error) {
             setError(error.message ||  "Login failed");

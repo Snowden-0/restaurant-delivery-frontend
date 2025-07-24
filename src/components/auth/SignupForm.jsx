@@ -49,7 +49,7 @@ const SignupForm = () => {
       setErrors({});
       try {
         await signup(formData);
-        navigate('/login');
+        navigate('/restaurants');
       } catch (error) {
         console.error("Signup failed:", error);
       }
