@@ -50,6 +50,7 @@ const Cart = () => {
     } else {
       navigate(path);
       handleCloseCart();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

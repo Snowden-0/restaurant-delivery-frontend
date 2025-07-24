@@ -19,8 +19,8 @@ const UserProfile = () => {
   const { user, logout } = useAuth(); 
 
   
-  const userName = user?.name || "User";
-  const userEmail = user?.email || "user@example.com";
+  const userName = user?.name;
+  const userEmail = user?.email;
 
   useEffect(() => {
     if (showDropdown) {
