@@ -1,10 +1,20 @@
-// pages/RestaurantListPage.jsx
-import React from 'react';
 import { useRestaurant } from '../context/RestaurantContext';
 import RestaurantCard from '../components/ui/RestaurantCard';
+import Pagination from '../components/ui/Pagination';
 
 const RestaurantListView = () => {
-  const { restaurants, loading, error } = useRestaurant();
+  const { 
+    paginatedRestaurants,
+    loading, 
+    error,
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+    goToPage,
+    changeItemsPerPage,
+    searchTerm
+  } = useRestaurant();
 
   if (loading) {
     return (
@@ -47,26 +57,75 @@ const RestaurantListView = () => {
             Explore our curated selection of the finest dining experiences in the city
           </p>
         </div>
-        
-        {/* Restaurant Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {restaurants.map((restaurant) => (
-            <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-          ))}
-        </div>
 
-        {/* 1. Improved message for when no results are found */}
-        {!loading && restaurants.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">
-              No restaurants found matching your search.
-            </p>
+        {totalItems > 0 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <div className="text-sm text-gray-600">
+              {searchTerm ? (
+                <>
+                  Found <span className="font-medium">{totalItems}</span> restaurants 
+                  matching "<span className="font-medium">{searchTerm}</span>"
+                </>
+              ) : (
+                <>
+                  Showing <span className="font-medium">{totalItems}</span> restaurants
+                </>
+              )}
+            </div>
+            
+            {/* Items per page selector */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="itemsPerPage" className="text-sm text-gray-600">
+                Show:
+              </label>
+              <select
+                id="itemsPerPage"
+                value={itemsPerPage}
+                onChange={(e) => changeItemsPerPage(Number(e.target.value))}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              >
+                <option value={6}>6 per page</option>
+                <option value={9}>9 per page</option>
+                <option value={12}>12 per page</option>
+                <option value={18}>18 per page</option>
+              </select>
+            </div>
           </div>
         )}
-
-        {restaurants.length === 0 && (
+        
+        {paginatedRestaurants.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {paginatedRestaurants.map((restaurant) => (
+                <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+              ))}
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={goToPage}
+              showInfo={true}
+            />
+          </>
+        ) : (
+          /* No results message */
           <div className="text-center py-12">
-            <p className="text-gray-600">No restaurants found.</p>
+            <div className="max-w-md mx-auto">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurants found</h3>
+              <p className="text-gray-600">
+                {searchTerm 
+                  ? `No restaurants match your search for "${searchTerm}". Try a different search term.`
+                  : "No restaurants are currently available."
+                }
+              </p>
+            </div>
           </div>
         )}
       </div>
