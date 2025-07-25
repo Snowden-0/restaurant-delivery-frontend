@@ -10,6 +10,7 @@ import ErrorPopup from './components/ui/ErrorPopup';
 import { CartProvider } from './context/CartContext';
 import CartDetailView from './views/CartDetailView';
 import ProfilePage from './views/UserProfileView';
+import CheckoutPageView from './views/CheckoutPageView';
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth(); // Destructure isAuthenticated and isLoading
@@ -54,6 +55,7 @@ function AppContent() {
                 <Route path="/restaurants/:id" element={<RestaurantDetailsView />} />
                 <Route path="/cart-details" element={<CartDetailView />} />
                 <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+                <Route path="/checkout" element={<PrivateRoute><CheckoutPageView /></PrivateRoute>} />
           </Route>
                 <Route path='/login' element={<LoginPage />} />
                 <Route path='/signup' element={<SignupPage />} />

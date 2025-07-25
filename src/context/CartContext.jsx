@@ -11,7 +11,6 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-    // Initialize cart from localStorage if available
     try {
       const savedCart = localStorage.getItem('cartItems');
       return savedCart ? JSON.parse(savedCart) : {};
@@ -25,7 +24,6 @@ export const CartProvider = ({ children }) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Effect to update total items and total price whenever cartItems changes
   useEffect(() => {
     let itemsCount = 0;
     let priceSum = 0;
@@ -36,8 +34,6 @@ export const CartProvider = ({ children }) => {
     }
     setTotalItems(itemsCount);
     setTotalPrice(priceSum);
-
-    // Save cart to localStorage
     try {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
     } catch (error) {
@@ -45,9 +41,25 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
-  // Function to add an item to the cart
   const addItemToCart = (item) => {
+    if (!item.restaurantId) {
+      console.error("Attempted to add an item to cart without a restaurantId.", item);
+      alert("Sorry, this item cannot be added to the cart right now.");
+      return;
+    }
+
     setCartItems((prevItems) => {
+      const cartValues = Object.values(prevItems);
+      
+      // Check if cart has items from a different restaurant
+      if (cartValues.length > 0 && cartValues[0].restaurantId !== item.restaurantId) {
+        alert("You can only order from one restaurant at a time. Your previous cart has been cleared.");
+        return {
+          [item.id]: { ...item, quantity: 1 },
+        };
+      }
+
+      // If cart is empty or item is from the same restaurant, add/update it
       const existingItem = prevItems[item.id];
       const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
       return {
@@ -60,7 +72,7 @@ export const CartProvider = ({ children }) => {
   const removeItemFromCart = (itemId) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems[itemId];
-      if (!existingItem) return prevItems; // Item not in cart
+      if (!existingItem) return prevItems;
 
       if (existingItem.quantity > 1) {
         return {
@@ -68,7 +80,6 @@ export const CartProvider = ({ children }) => {
           [itemId]: { ...existingItem, quantity: existingItem.quantity - 1 },
         };
       } else {
-        // Remove item completely if quantity is 1
         const newItems = { ...prevItems };
         delete newItems[itemId];
         return newItems;
