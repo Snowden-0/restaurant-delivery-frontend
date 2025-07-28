@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners'; // Import the spinner
 
 const SignupForm = () => {
   const { signup } = useAuth();
@@ -15,7 +16,7 @@ const SignupForm = () => {
     address: ''
   });
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,12 +26,10 @@ const SignupForm = () => {
   const validate = () => {
     const newErrors = {};
 
-    // Name validation: must not contain digits
     if (/\d/.test(formData.name)) {
       newErrors.name = 'Name cannot contain any digits.';
     }
 
-    // Phone number validation: must start with '0' and be 11 digits
     if (!formData.phone_number.startsWith('0')) {
       newErrors.phone_number = 'Phone number must start with 0.';
     } else if (!/^\d{11}$/.test(formData.phone_number)) {
@@ -47,15 +46,14 @@ const SignupForm = () => {
       setErrors(validationErrors);
     } else {
       setErrors({});
-      setLoading(true); // Set loading to true when the request starts
+      setLoading(true);
       try {
         await signup(formData);
         navigate('/restaurants');
       } catch (error) {
         console.error("Signup failed:", error);
-        // You might want to display an error message to the user here
       } finally {
-        setLoading(false); // Set loading to false when the request finishes (success or failure)
+        setLoading(false);
       }
     }
   };
@@ -108,8 +106,15 @@ const SignupForm = () => {
         onChange={handleChange}
         required
       />
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Signing up...' : 'Sign Up'} {/* Change button text based on loading state */}
+      <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
+        {loading ? (
+          <>
+            <ClipLoader color="#ffffff" size={20} className="mr-2" /> {/* React Spinner */}
+            Signing up...
+          </>
+        ) : (
+          'Sign Up'
+        )}
       </Button>
     </form>
   );

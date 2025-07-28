@@ -3,12 +3,13 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners'; // Import the spinner
 
 const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,15 +17,14 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true when the request starts
+    setLoading(true);
     try {
       await login(formData);
       navigate('/restaurants');
     } catch (error) {
       console.error("Login failed:", error);
-      // You might want to display an error message to the user here
     } finally {
-      setLoading(false); // Set loading to false when the request finishes (success or failure)
+      setLoading(false);
     }
   };
 
@@ -46,8 +46,15 @@ const LoginForm = () => {
         onChange={handleChange}
         required
       />
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'} {/* Change button text based on loading state */}
+      <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
+        {loading ? (
+          <>
+            <ClipLoader color="#ffffff" size={20} className="mr-2" /> {/* React Spinner */}
+            Logging in...
+          </>
+        ) : (
+          'Login'
+        )}
       </Button>
     </form>
   );
