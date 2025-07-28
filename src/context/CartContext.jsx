@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const PARSE_CART_ERROR = 'Failed to parse cart from localStorage';
-const SAVE_CART_ERROR = 'Failed to save cart to localStorage';
+import { useAlert } from './AlertContext'; // Import useAlert
 
 const CartContext = createContext();
 
@@ -10,74 +8,75 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(() => {
-    // Initialize cart from localStorage if available
-    try {
-      const savedCart = localStorage.getItem('cartItems');
-      return savedCart ? JSON.parse(savedCart) : {};
-    } catch (error) {
-      console.error(PARSE_CART_ERROR, error);
-      return {};
-    }
-  });
+  const [cartItems, setCartItems] = useState([]);
 
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { showAlert } = useAlert(); // Use the showAlert function from AlertContext
 
-  // Effect to update total items and total price whenever cartItems changes
   useEffect(() => {
     let itemsCount = 0;
     let priceSum = 0;
-    for (const itemId in cartItems) {
-      const item = cartItems[itemId];
+  
+    cartItems.forEach(item => {
       itemsCount += item.quantity;
       priceSum += item.quantity * parseFloat(item.price);
-    }
+    });
+
     setTotalItems(itemsCount);
     setTotalPrice(priceSum);
-
-    // Save cart to localStorage
-    try {
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error(SAVE_CART_ERROR, error);
-    }
+    
   }, [cartItems]);
 
-  // Function to add an item to the cart
   const addItemToCart = (item) => {
+    if (!item.restaurantId) {
+      showAlert("Sorry, this item cannot be added to the cart right now.", "error"); // Use custom alert
+      return;
+    }
+
     setCartItems((prevItems) => {
-      const existingItem = prevItems[item.id];
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
-      return {
-        ...prevItems,
-        [item.id]: { ...item, quantity: newQuantity },
-      };
+      // Check if cart has items from a different restaurant
+      if (prevItems.length > 0 && prevItems[0].restaurantId !== item.restaurantId) {
+        showAlert("You can only order from one restaurant at a time. Your previous cart has been cleared.", "warning"); // Use custom alert
+        return [{ ...item, quantity: 1 }]; 
+      }
+
+      const existingItemIndex = prevItems.findIndex(cartItem => cartItem.id === item.id);
+
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + 1,
+        };
+        return updatedItems;
+      } else {
+        return [...prevItems, { ...item, quantity: 1 }];
+      }
     });
   };
 
   const removeItemFromCart = (itemId) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems[itemId];
-      if (!existingItem) return prevItems; // Item not in cart
+      const existingItemIndex = prevItems.findIndex(item => item.id === itemId);
+      if (existingItemIndex === -1) return prevItems; 
 
-      if (existingItem.quantity > 1) {
-        return {
-          ...prevItems,
-          [itemId]: { ...existingItem, quantity: existingItem.quantity - 1 },
+      const updatedItems = [...prevItems];
+      if (updatedItems[existingItemIndex].quantity > 1) {
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity - 1,
         };
       } else {
-        // Remove item completely if quantity is 1
-        const newItems = { ...prevItems };
-        delete newItems[itemId];
-        return newItems;
+        updatedItems.splice(existingItemIndex, 1);
       }
+      return updatedItems;
     });
   };
 
   const clearCart = () => {
-    setCartItems({});
+    setCartItems([]);
   };
 
   const contextValue = {

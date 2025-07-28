@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext'; // Import the useAuth hook
+import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners'; 
 
-const LoginForm = () => { 
+const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,11 +17,14 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await login(formData);
       navigate('/restaurants');
     } catch (error) {
       console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,7 +46,16 @@ const LoginForm = () => {
         onChange={handleChange}
         required
       />
-      <Button type="submit" className="w-full">Login</Button>
+      <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
+        {loading ? (
+          <>
+            <ClipLoader color="#ffffff" size={20} className="mr-2" />
+            Logging in...
+          </>
+        ) : (
+          'Login'
+        )}
+      </Button>
     </form>
   );
 };

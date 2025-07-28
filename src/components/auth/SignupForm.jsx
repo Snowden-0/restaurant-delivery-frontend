@@ -3,19 +3,20 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners';
 
 const SignupForm = () => {
-  
-  const { signup } = useAuth(); 
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     phone_number: '',
-    address: '' 
+    address: ''
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,12 +26,10 @@ const SignupForm = () => {
   const validate = () => {
     const newErrors = {};
 
-    // Name validation: must not contain digits
     if (/\d/.test(formData.name)) {
       newErrors.name = 'Name cannot contain any digits.';
     }
 
-    // Phone number validation: must start with '0' and be 11 digits
     if (!formData.phone_number.startsWith('0')) {
       newErrors.phone_number = 'Phone number must start with 0.';
     } else if (!/^\d{11}$/.test(formData.phone_number)) {
@@ -47,11 +46,14 @@ const SignupForm = () => {
       setErrors(validationErrors);
     } else {
       setErrors({});
+      setLoading(true);
       try {
         await signup(formData);
         navigate('/restaurants');
       } catch (error) {
         console.error("Signup failed:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -104,7 +106,16 @@ const SignupForm = () => {
         onChange={handleChange}
         required
       />
-      <Button type="submit" className="w-full">Sign Up</Button>
+      <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
+        {loading ? (
+          <>
+            <ClipLoader color="#ffffff" size={20} className="mr-2" />
+            Signing up...
+          </>
+        ) : (
+          'Sign Up'
+        )}
+      </Button>
     </form>
   );
 };
