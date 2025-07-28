@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { fetchProfile } from '../services/userServices'; // To get user info
-import { createOrder } from '../services/orderServices'; // Our new service
+import { fetchProfile } from '../services/userServices';
+import { createOrder } from '../services/orderServices';
+import { useAuth } from '../context/AuthContext';
 
+const PLACE_ORDER_ERROR = 'Cannot place order. Ensure you are logged in and your cart is not empty.';
+const AUTH_ERROR = 'You must be logged in to place an order.';
+const FETCH_PROFILE_ERROR = 'Cannot fetch profile for the user';
+const FETCH_RESTAURANT_ERROR = 'Could not determine the restaurant for the order.';
+const UNEXPECTED_ERROR = 'An unexpected error occurred.'
 
 const CheckoutPageView = () => {
   const { cartItems, totalPrice, clearCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const [user, setUser] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [error, setError] = useState('');
@@ -16,58 +23,68 @@ const CheckoutPageView = () => {
   // Fetch user profile data on component mount
   useEffect(() => {
     const loadProfile = async () => {
+      if (!isAuthenticated) {
+        setError(AUTH_ERROR);
+        setTimeout(() => navigate('/login'), 2000);
+        return;
+      }
       try {
         const profileData = await fetchProfile();
         setUser(profileData);
       } catch (err) {
-        setError('You must be logged in to place an order.');
-        // Redirect to login if fetching profile fails
+        setError(err.message || FETCH_PROFILE_ERROR);
         setTimeout(() => navigate('/login'), 2000);
       }
     };
     loadProfile();
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handlePlaceOrder = async () => {
-    if (!user || Object.keys(cartItems).length === 0) {
-      setError('Cannot place order. Ensure you are logged in and your cart is not empty.');
+    if (!user || cartItems.length === 0) {
+      setError(PLACE_ORDER_ERROR);
       return;
     }
 
     setLoading(true);
     setError('');
 
-    // Assuming all items in the cart are from the same restaurant.
-    // In a real app, you might need to enforce this or handle multiple orders.
-    const restaurantId = Object.values(cartItems)[0]?.restaurantId;
+    const restaurantId = cartItems[0]?.restaurantId;
     if (!restaurantId) {
-        setError('Could not determine the restaurant for the order.');
+        setError(FETCH_RESTAURANT_ERROR);
         setLoading(false);
         return;
     }
 
-
-    // Prepare the data payload for the backend
     const orderData = {
       restaurantId,
       totalAmount: totalPrice,
       paymentMethod,
-      items: Object.values(cartItems).map(item => ({
+      items: cartItems.map(item => ({
         menuItemId: item.id,
         quantity: item.quantity,
-        price: item.price // Sending price for potential backend validation
+        price: item.price
       })),
     };
-    console.log(orderData)
+    //console.log(orderData);
 
     try {
-      await createOrder(orderData);
-      // If successful:
-      alert('Order placed successfully!'); // Replace with a proper success modal/toast
+      const response = await createOrder(orderData);
       clearCart();
-      navigate('/my-orders'); // Navigate to an order history page
+      navigate('/order-confirmation', {
+        state: {
+          order: {
+            orderId: 'ORD-' + response.order.id.substring(0, 8).toUpperCase(),
+            userName: user.name,
+            userAddress: user.address, 
+            userPhoneNumber: user.phone_number, 
+            totalAmount: totalPrice,
+            paymentMethod: paymentMethod,
+            items: cartItems,
+          }
+        }
+      });
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err.message || UNEXPECTED_ERROR);
     } finally {
       setLoading(false);
     }
@@ -84,7 +101,7 @@ const CheckoutPageView = () => {
       {/* Order Summary */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-        {Object.values(cartItems).map(item => (
+        {cartItems.map(item => (
           <div key={item.id} className="flex justify-between items-center mb-2">
             <span>{item.name} x {item.quantity}</span>
             <span>${(item.price * item.quantity).toFixed(2)}</span>
@@ -122,7 +139,7 @@ const CheckoutPageView = () => {
 
       <button 
         onClick={handlePlaceOrder}
-        disabled={loading || Object.keys(cartItems).length === 0}
+        disabled={loading || cartItems.length === 0}
         className="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 disabled:bg-gray-400 flex items-center justify-center"
       >
         {loading ? (

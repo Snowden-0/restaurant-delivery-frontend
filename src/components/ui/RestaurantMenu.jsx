@@ -38,7 +38,7 @@ const RestaurantMenu = ({ menuItems }) => {
                 </h3>
                 <div className="grid grid-cols-1 gap-4">
                   {groupedMenuItems[category].map((item) => {
-                    const itemInCart = cartItems[item.id];
+                    const itemInCart = cartItems.find(cartItem => cartItem.id === item.id);
                     const quantity = itemInCart ? itemInCart.quantity : 0;
 
                     return (
