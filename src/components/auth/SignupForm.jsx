@@ -5,17 +5,17 @@ import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 
 const SignupForm = () => {
-  
-  const { signup } = useAuth(); 
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     phone_number: '',
-    address: '' 
+    address: ''
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,11 +47,15 @@ const SignupForm = () => {
       setErrors(validationErrors);
     } else {
       setErrors({});
+      setLoading(true); // Set loading to true when the request starts
       try {
         await signup(formData);
         navigate('/restaurants');
       } catch (error) {
         console.error("Signup failed:", error);
+        // You might want to display an error message to the user here
+      } finally {
+        setLoading(false); // Set loading to false when the request finishes (success or failure)
       }
     }
   };
@@ -104,7 +108,9 @@ const SignupForm = () => {
         onChange={handleChange}
         required
       />
-      <Button type="submit" className="w-full">Sign Up</Button>
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Signing up...' : 'Sign Up'} {/* Change button text based on loading state */}
+      </Button>
     </form>
   );
 };
