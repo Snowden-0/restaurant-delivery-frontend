@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
-import { ClipLoader } from 'react-spinners'; // Import the spinner
+import { ClipLoader } from 'react-spinners'; 
 
 const LoginForm = () => {
   const { login } = useAuth();
@@ -49,7 +49,7 @@ const LoginForm = () => {
       <Button type="submit" className="w-full flex items-center justify-center" disabled={loading}>
         {loading ? (
           <>
-            <ClipLoader color="#ffffff" size={20} className="mr-2" /> {/* React Spinner */}
+            <ClipLoader color="#ffffff" size={20} className="mr-2" />
             Logging in...
           </>
         ) : (
