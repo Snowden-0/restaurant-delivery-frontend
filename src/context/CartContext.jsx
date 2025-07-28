@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAlert } from './AlertContext'; // Import useAlert
 
 const CartContext = createContext();
 
@@ -12,6 +13,7 @@ export const CartProvider = ({ children }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { showAlert } = useAlert(); // Use the showAlert function from AlertContext
 
   useEffect(() => {
     let itemsCount = 0;
@@ -29,15 +31,14 @@ export const CartProvider = ({ children }) => {
 
   const addItemToCart = (item) => {
     if (!item.restaurantId) {
-      console.error("Attempted to add an item to cart without a restaurantId.", item);
-      alert("Sorry, this item cannot be added to the cart right now.");
+      showAlert("Sorry, this item cannot be added to the cart right now.", "error"); // Use custom alert
       return;
     }
 
     setCartItems((prevItems) => {
       // Check if cart has items from a different restaurant
       if (prevItems.length > 0 && prevItems[0].restaurantId !== item.restaurantId) {
-        alert("You can only order from one restaurant at a time. Your previous cart has been cleared.");
+        showAlert("You can only order from one restaurant at a time. Your previous cart has been cleared.", "warning"); // Use custom alert
         return [{ ...item, quantity: 1 }]; 
       }
 
