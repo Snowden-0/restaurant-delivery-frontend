@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, Settings, ShoppingBag } from 'lucide-react'; // Import ShoppingBag icon
+import { ChevronDown, Settings, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom'; // Corrected from 'react-router'
+import { Link } from 'react-router-dom';
 import ConfirmationModal from '../components/ui/ConfirmationModal'; 
 
 const COMMON_BUTTON_CLASSES = 'flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors';
