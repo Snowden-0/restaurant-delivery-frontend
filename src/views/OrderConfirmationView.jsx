@@ -71,7 +71,7 @@ const OrderConfirmationView = () => {
             Continue Shopping
           </button>
           <button
-            onClick={() => navigate('/profile')} 
+            onClick={() => navigate('/orders')} 
             className="w-full bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition-all duration-300 transform hover:scale-105 shadow-md"
           >
             View My Orders
