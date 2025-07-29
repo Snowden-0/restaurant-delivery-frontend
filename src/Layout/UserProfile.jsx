@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, Settings } from 'lucide-react';
+import { ChevronDown, Settings, ShoppingBag } from 'lucide-react'; // Import ShoppingBag icon
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router'; 
+import { Link } from 'react-router-dom'; // Corrected from 'react-router'
 import ConfirmationModal from '../components/ui/ConfirmationModal'; 
 
 const COMMON_BUTTON_CLASSES = 'flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors';
@@ -17,8 +17,6 @@ const UserProfile = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false); 
   const { user, logout } = useAuth(); 
-
-  
   const userName = user?.name;
   const userEmail = user?.email;
 
@@ -36,8 +34,7 @@ const UserProfile = () => {
     setShowDropdown(false); 
   };
 
-  const fullName = userName;
-  const firstName = userName ? fullName.split(" ")[0] : '';
+  const firstName = userName ? userName.split(" ")[0] : '';
 
   return (
     <div className="relative">
@@ -64,6 +61,10 @@ const UserProfile = () => {
             {firstName && <p className="font-medium text-gray-800">{firstName}</p>}
             {userEmail && <p className="text-sm text-gray-500">{userEmail}</p>}
           </div>
+          <Link to="/orders" className={REGULAR_ITEM_CLASSES}>
+            <ShoppingBag size={16} className="inline mr-2" />
+            My Orders
+          </Link>
           <Link to="/profile" className={REGULAR_ITEM_CLASSES}>
             <Settings size={16} className="inline mr-2" />
             Profile & Settings
