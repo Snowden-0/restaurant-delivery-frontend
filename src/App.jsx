@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 import Layout from './Layout/Layout';
 import LoginPage from './views/user/LoginPage';
 import SignupPage from './views/user/SignupPage';
@@ -12,6 +12,8 @@ import CartDetailView from './views/CartDetailView';
 import ProfilePage from './views/UserProfileView';
 import CheckoutPageView from './views/CheckoutPageView';
 import OrderConfirmationPage from './views/OrderConfirmationView';
+import OrdersView from './views/OrdersView';
+import { OrderProvider } from './context/OrderContext';
 import { AlertProvider, useAlert } from './context/AlertContext';
 
 
@@ -36,7 +38,9 @@ function App() {
             <RestaurantProvider>
               <AlertProvider> 
                 <CartProvider>
-                  <AppContent />
+                  <OrderProvider>
+                    <AppContent />
+                  </OrderProvider>
                 </CartProvider>
               </AlertProvider>
             </RestaurantProvider>
@@ -48,19 +52,17 @@ function App() {
 
 function AppContent() {
   const { error, clearError } = useAuth(); 
-  const { showAlert } = useAlert(); // Use showAlert from AlertContext
+  const { showAlert } = useAlert();
 
-  // Handle AuthContext errors using the new showAlert
   useEffect(() => {
     if (error) {
       showAlert(error, 'error');
-      clearError(); // Clear the error in AuthContext after showing
+      clearError();
     }
   }, [error, showAlert, clearError]);
 
   return (
     <>
-      {/* REMOVED: {error && <ErrorPopup message={error} onClose={clearError} />} */}
       <Routes>
           <Route element={<Layout />}>
                 {/* Protected Routes using PrivateRoute */}
@@ -71,6 +73,7 @@ function AppContent() {
                 <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
                 <Route path="/checkout" element={<PrivateRoute><CheckoutPageView /></PrivateRoute>} />
                 <Route path="/order-confirmation" element={<PrivateRoute><OrderConfirmationPage /></PrivateRoute>} />
+                <Route path="/orders" element={<PrivateRoute><OrdersView /></PrivateRoute>} />
           </Route>
                 <Route path='/login' element={<LoginPage />} />
                 <Route path='/signup' element={<SignupPage />} />
