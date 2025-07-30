@@ -1,9 +1,16 @@
-import React from 'react';
-import { X, Calendar, Hash, CreditCard, ShoppingCart, Home, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Calendar, Hash, CreditCard, ShoppingCart, Home, Clock, Star } from 'lucide-react';
 import { ClipLoader } from 'react-spinners';
 import { formatCurrency, formatDate, formatOrderId } from '../../utils/formatters';
+import RatingCard from './RatingCard';
+import { useOrders } from '../../context/OrderContext'; 
+import { useAlert } from '../../context/AlertContext'; 
 
 const OrderDetailModal = ({ order, onClose, isLoading }) => {
+    const { submitOrderRating, fetchOrderDetails } = useOrders(); // Add fetchOrderDetails
+    const { showAlert } = useAlert();
+    const [isRatingSubmitting, setIsRatingSubmitting] = useState(false);
+
     if (!order && !isLoading) return null;
 
     const renderSkeleton = () => (
@@ -26,6 +33,20 @@ const OrderDetailModal = ({ order, onClose, isLoading }) => {
         return formatDate(dateString, { hour: '2-digit', minute: '2-digit' });
     };
 
+    
+    const handleRatingSubmit = React.useCallback(async (orderId, rating, comment) => {
+        setIsRatingSubmitting(true);
+        try {
+            await submitOrderRating(orderId, rating, comment);
+            await fetchOrderDetails(orderId);
+            showAlert('Rating submitted successfully!', 'success');
+        } catch (error) {
+            showAlert(error.message || 'Failed to submit rating.', 'error');
+        } finally {
+            setIsRatingSubmitting(false);
+        }
+    }, [submitOrderRating, fetchOrderDetails, showAlert]);
+
     return (
         <div className="fixed inset-0 bg-white/20 backdrop-blur-sm z-50 flex justify-center items-center p-4" onClick={onClose}>
             <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -39,9 +60,9 @@ const OrderDetailModal = ({ order, onClose, isLoading }) => {
                 <div className="p-6">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-12">
-                            <ClipLoader 
-                                color="#4F46E5" 
-                                size={50} 
+                            <ClipLoader
+                                color="#4F46E5"
+                                size={50}
                                 loading={isLoading}
                                 cssOverride={{
                                     display: "block",
@@ -72,7 +93,7 @@ const OrderDetailModal = ({ order, onClose, isLoading }) => {
                                     </p>
                                 </div>
                             </div>
-                           
+
                             <div className="mb-6">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center"><ShoppingCart size={18} className="mr-2"/>Items</h3>
                                 <div className="border rounded-lg">
@@ -110,6 +131,67 @@ const OrderDetailModal = ({ order, onClose, isLoading }) => {
                                          <p className="text-3xl font-bold">{formatCurrency(order.total_amount)}</p>
                                      </div>
                                 </div>
+                            </div>
+
+                            {/* Rating Section with Loading State */}
+                            <div className="mt-6 border-t pt-6">
+                                {isRatingSubmitting ? (
+                                    // Show loading state during rating submission
+                                    <div className="flex flex-col items-center justify-center py-8">
+                                        <ClipLoader
+                                            color="#F59E0B"
+                                            size={40}
+                                            loading={isRatingSubmitting}
+                                            cssOverride={{
+                                                display: "block",
+                                                margin: "0 auto",
+                                            }}
+                                        />
+                                        <p className="mt-4 text-gray-600">Submitting your rating...</p>
+                                    </div>
+                                ) : (
+                                    // Show rating content when not submitting
+                                    <>
+                                        {(order.order_rating !== null && order.order_rating !== undefined) || order.order_comment ? (
+                                            <>
+                                                <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                                                    <Star size={18} className="mr-2"/>Your Rating
+                                                </h3>
+                                                <div className="bg-amber-50 p-4 rounded-lg space-y-2">
+                                                    {(order.order_rating !== null && order.order_rating !== undefined) && (
+                                                        <div className="flex items-center">
+                                                            <span className="font-semibold text-gray-700 mr-2">Rating:</span>
+                                                            <div className="flex">
+                                                                {[1, 2, 3, 4, 5].map((starValue) => (
+                                                                    <Star
+                                                                        key={starValue}
+                                                                        size={20}
+                                                                        fill={starValue <= order.order_rating ? '#F59E0B' : 'none'}
+                                                                        stroke={starValue <= order.order_rating ? '#F59E0B' : '#D1D5DB'}
+                                                                        className="text-amber-500"
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {order.order_comment && (
+                                                        <p className="text-gray-700">
+                                                            <span className="font-semibold">Comment:</span> {order.order_comment}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <RatingCard
+                                                orderId={order.id}
+                                                onRatingSubmit={handleRatingSubmit}
+                                                existingRating={order.order_rating}
+                                                existingComment={order.order_comment}
+                                                isSubmitting={isRatingSubmitting}
+                                            />
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </>
                     )}

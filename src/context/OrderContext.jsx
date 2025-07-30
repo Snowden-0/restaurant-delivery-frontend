@@ -1,10 +1,12 @@
 import React, { createContext, useState, useContext, useCallback } from 'react';
 import { getOrdersByUserId, getOrderDetailById } from '../services/orderServices';
+import { createRating } from '../services/ratingServices';
 import { useAuth } from './AuthContext';
 import { useAlert } from './AlertContext';
 
 const FETCH_ORDER_ERROR = 'Failed to fetch orders.' ;
 const FETCH_ORDER_DETAIL_ERROR = 'Failed to fetch order details.';
+const SUBMIT_RATING_ERROR = 'Failed to submit rating.';
 
 const OrderContext = createContext(null);
 
@@ -57,6 +59,27 @@ export const OrderProvider = ({ children }) => {
         setSelectedOrder(null);
     };
 
+    const submitOrderRating = useCallback(async (orderId, rating, comment) => {
+        try {
+            const newRating = await createRating(orderId, rating, comment);
+            setSelectedOrder(prevOrder => {
+                if (prevOrder && prevOrder.id === orderId) {
+                    return {
+                        ...prevOrder,
+                        order_rating: newRating.rating,
+                        order_comment: newRating.comment,
+                    };
+                }
+                return prevOrder;
+            });
+            return newRating;
+        } catch (error) {
+            showAlert(error.message || SUBMIT_RATING_ERROR, 'error');
+            throw error; 
+        }
+    }, [showAlert]);
+
+
     const value = {
         orders,
         selectedOrder,
@@ -65,6 +88,7 @@ export const OrderProvider = ({ children }) => {
         fetchOrders,
         fetchOrderDetails,
         clearSelectedOrder,
+        submitOrderRating, 
     };
 
     return (
