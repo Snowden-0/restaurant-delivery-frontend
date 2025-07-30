@@ -98,7 +98,7 @@ const CheckoutPageView = () => {
       navigate('/order-confirmation', {
         state: {
           order: {
-            orderId: 'ORD-' + response.order.id.substring(0, 8).toUpperCase(),
+            orderId: response.order.id,
             userName: user.name,
             userAddress: user.address, 
             userPhoneNumber: user.phone_number, 
