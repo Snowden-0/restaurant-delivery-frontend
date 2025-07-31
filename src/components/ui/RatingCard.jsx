@@ -75,7 +75,7 @@ const RatingCard = ({ orderId, onRatingSubmit, existingRating, existingComment, 
 
       <div className="mb-6">
         <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-          Add a comment (optional)
+          Add a comment
         </label>
         <textarea
           id="comment"
