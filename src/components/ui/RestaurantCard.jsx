@@ -1,17 +1,15 @@
-// components/RestaurantCard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, ChefHat } from 'lucide-react';
+import { MapPin, Clock, ChefHat, Star } from 'lucide-react';
 import { restaurantService } from '../../services/restaurantService';
 
 const RestaurantCard = ({ restaurant }) => {
   const navigate = useNavigate();
-  const { id, name, is_available, address, image_url } = restaurant;
+  const { id, name, is_available, address, image_url, average_rating, total_ratings } = restaurant;
   const [cuisines, setCuisines] = useState([]);
   const [loadingCuisines, setLoadingCuisines] = useState(true);
   const [errorCuisines, setErrorCuisines] = useState(null);
 
-  // Fetch cuisines when component mounts
   useEffect(() => {
     const fetchCuisines = async () => {
       try {
@@ -34,6 +32,52 @@ const RestaurantCard = ({ restaurant }) => {
     navigate(`/restaurants/${id}`);
   };
 
+  const renderStarRating = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    // Full stars
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      );
+    }
+    
+    // Half star
+    if (hasHalfStar) {
+      stars.push(
+        <div key="half" className="relative">
+          <Star className="w-4 h-4 text-gray-300" />
+          <div className="absolute inset-0 overflow-hidden w-1/2">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          </div>
+        </div>
+      );
+    }
+    
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
+      );
+    }
+    
+    return stars;
+  };
+
+  const RatingSkeleton = () => (
+    <div className="flex items-center gap-2 mb-3">
+      <div className="flex gap-1">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="w-4 h-4 bg-gray-200 rounded animate-pulse" />
+        ))}
+      </div>
+      <div className="h-4 w-8 bg-gray-200 rounded animate-pulse" />
+      <div className="h-4 w-12 bg-gray-200 rounded animate-pulse" />
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 group">
       {/* Restaurant Image */}
@@ -51,6 +95,36 @@ const RestaurantCard = ({ restaurant }) => {
         <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-1">
           {name}
         </h3>
+
+        {/* Rating Section */}
+        <div className="mb-3">
+          {average_rating && total_ratings ? (
+            average_rating && total_ratings > 0 ? (
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {renderStarRating(average_rating)}
+                </div>
+                <span className="text-sm font-semibold text-gray-800">
+                  {average_rating}
+                </span>
+                <span className="text-sm text-gray-500">
+                  ({total_ratings} {total_ratings === 1 ? 'review' : 'reviews'})
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-gray-300" />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-500">No reviews yet</span>
+              </div>
+            )
+          ) : (
+            <RatingSkeleton />
+          )}
+        </div>
 
         {/* Location */}
         <div className="flex items-center gap-2 mb-3">
@@ -121,7 +195,6 @@ const RestaurantCard = ({ restaurant }) => {
           </span>
         </div>
 
-        {/* View Details Button */}
         <button
           onClick={handleViewDetails}
           className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
