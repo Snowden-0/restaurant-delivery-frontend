@@ -1,3 +1,4 @@
+// components/RestaurantCard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Clock, ChefHat, Star } from 'lucide-react';
@@ -10,6 +11,7 @@ const RestaurantCard = ({ restaurant }) => {
   const [loadingCuisines, setLoadingCuisines] = useState(true);
   const [errorCuisines, setErrorCuisines] = useState(null);
 
+  // Fetch cuisines when component mounts
   useEffect(() => {
     const fetchCuisines = async () => {
       try {
@@ -32,6 +34,7 @@ const RestaurantCard = ({ restaurant }) => {
     navigate(`/restaurants/${id}`);
   };
 
+  // Function to render star rating
   const renderStarRating = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -56,6 +59,7 @@ const RestaurantCard = ({ restaurant }) => {
       );
     }
     
+    // Empty stars
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
@@ -66,6 +70,7 @@ const RestaurantCard = ({ restaurant }) => {
     return stars;
   };
 
+  // Rating skeleton component
   const RatingSkeleton = () => (
     <div className="flex items-center gap-2 mb-3">
       <div className="flex gap-1">
@@ -98,7 +103,8 @@ const RestaurantCard = ({ restaurant }) => {
 
         {/* Rating Section */}
         <div className="mb-3">
-          {average_rating && total_ratings ? (
+          {average_rating !== undefined && total_ratings !== undefined ? (
+            // Show actual rating
             average_rating && total_ratings > 0 ? (
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
@@ -112,6 +118,7 @@ const RestaurantCard = ({ restaurant }) => {
                 </span>
               </div>
             ) : (
+              // No ratings yet
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
@@ -122,6 +129,7 @@ const RestaurantCard = ({ restaurant }) => {
               </div>
             )
           ) : (
+            // Loading skeleton
             <RatingSkeleton />
           )}
         </div>
@@ -195,6 +203,7 @@ const RestaurantCard = ({ restaurant }) => {
           </span>
         </div>
 
+        {/* View Details Button */}
         <button
           onClick={handleViewDetails}
           className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
