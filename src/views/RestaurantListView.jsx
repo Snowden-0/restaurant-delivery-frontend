@@ -1,5 +1,6 @@
 import { useRestaurant } from '../context/RestaurantContext';
 import RestaurantCard from '../components/ui/RestaurantCard';
+import FilterBar from '../components/filters/FilterBar';
 import { Pagination } from 'antd';
 
 const RestaurantListView = () => {
@@ -13,7 +14,12 @@ const RestaurantListView = () => {
     itemsPerPage,
     goToPage,
     changeItemsPerPage,
-    searchTerm
+    searchTerm,
+    filters,
+    sortOption,
+    applyFilters,
+    clearAllFilters,
+    setSortOption
   } = useRestaurant();
 
   if (loading) {
@@ -34,13 +40,21 @@ const RestaurantListView = () => {
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
           <div className="text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
-            >
-              Try Again
-            </button>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <div className="text-red-600 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-red-900 mb-2">Something went wrong</h3>
+              <p className="text-red-700 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -49,30 +63,46 @@ const RestaurantListView = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Discover Amazing Restaurants</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore our curated selection of the finest dining experiences in the city
-          </p>
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Discover Amazing Restaurants
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explore our curated selection of the finest dining experiences in the city
+            </p>
+          </div>
         </div>
+      </div>
 
-        {totalItems > 0 && (
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <div className="text-sm text-gray-600">
-              {searchTerm ? (
-                <>
-                  Found <span className="font-medium">{totalItems}</span> restaurants 
-                  matching "<span className="font-medium">{searchTerm}</span>"
-                </>
-              ) : (
-                <>
-                  Showing <span className="font-medium">{totalItems}</span> restaurants
-                </>
-              )}
+      <FilterBar
+        filters={filters}
+        onFiltersChange={applyFilters}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
+        onClearAllFilters={clearAllFilters}
+        totalResults={totalItems}
+      />
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        {searchTerm && (
+          <div className="mb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-blue-800">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span className="font-medium">
+                  Search results for "{searchTerm}" 
+                  {totalItems > 0 && (
+                    <span className="font-normal"> - {totalItems} restaurant{totalItems !== 1 ? 's' : ''} found</span>
+                  )}
+                </span>
+              </div>
             </div>
-            
           </div>
         )}
         
@@ -84,7 +114,7 @@ const RestaurantListView = () => {
               ))}
             </div>
             
-            {/* Ant Design Pagination Component */}
+            {/* Pagination */}
             <div className="flex justify-center mt-8">
               <Pagination
                 current={currentPage}
@@ -103,21 +133,42 @@ const RestaurantListView = () => {
             </div>
           </>
         ) : (
-          /* No results message */
-          <div className="text-center py-12">
+          <div className="text-center py-16">
             <div className="max-w-md mx-auto">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              <div className="text-gray-400 mb-6">
+                <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No restaurants found</h3>
-              <p className="text-gray-600">
-                {searchTerm 
-                  ? `No restaurants match your search for "${searchTerm}". Try a different search term.`
-                  : "No restaurants are currently available."
-                }
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">No restaurants found</h3>
+              <p className="text-gray-600 mb-6">
+                {searchTerm ? (
+                  <>
+                    No restaurants match your search for "<strong>{searchTerm}</strong>" with the current filters.
+                  </>
+                ) : (
+                  <>
+                    No restaurants match your current filter criteria.
+                  </>
+                )}
               </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                )}
+                <button
+                  onClick={clearAllFilters}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear All Filters
+                </button>
+              </div>
             </div>
           </div>
         )}
