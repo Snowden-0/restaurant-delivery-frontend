@@ -5,22 +5,27 @@ import { Pagination } from 'antd';
 
 const RestaurantListView = () => {
   const { 
-    paginatedRestaurants,
+    restaurants,
     loading, 
     error,
     currentPage,
     totalPages,
-    totalItems,
-    itemsPerPage,
+    totalCount,
+    limit,
     goToPage,
     changeItemsPerPage,
-    searchTerm,
     filters,
-    sortOption,
     applyFilters,
-    clearAllFilters,
-    setSortOption
+    clearAllFilters
   } = useRestaurant();
+
+  const handlePageChange = (page) => {
+    goToPage(page);
+  };
+
+  const handlePageSizeChange = (current, size) => {
+    changeItemsPerPage(size);
+  };
 
   if (loading) {
     return (
@@ -79,16 +84,14 @@ const RestaurantListView = () => {
 
       <FilterBar
         filters={filters}
-        onFiltersChange={applyFilters}
-        sortOption={sortOption}
-        onSortChange={setSortOption}
+        onFiltersChange={(newFilters) => applyFilters(newFilters, 1, limit)}
         onClearAllFilters={clearAllFilters}
-        totalResults={totalItems}
+        totalResults={totalCount}
       />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {searchTerm && (
+        {filters.name && (
           <div className="mb-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-blue-800">
@@ -96,9 +99,9 @@ const RestaurantListView = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <span className="font-medium">
-                  Search results for "{searchTerm}" 
-                  {totalItems > 0 && (
-                    <span className="font-normal"> - {totalItems} restaurant{totalItems !== 1 ? 's' : ''} found</span>
+                  Search results for "{filters.name}" 
+                  {totalCount > 0 && (
+                    <span className="font-normal"> - {totalCount} restaurant{totalCount !== 1 ? 's' : ''} found</span>
                   )}
                 </span>
               </div>
@@ -106,10 +109,23 @@ const RestaurantListView = () => {
           </div>
         )}
         
-        {paginatedRestaurants.length > 0 ? (
+        {restaurants.length > 0 ? (
           <>
+            {/* Results Summary */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-gray-600">
+                  Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalCount)} of {totalCount} restaurants
+                </p>
+                <p className="text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </p>
+              </div>
+            </div>
+
+            {/* Restaurant Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {paginatedRestaurants.map((restaurant) => (
+              {restaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
               ))}
             </div>
@@ -118,17 +134,15 @@ const RestaurantListView = () => {
             <div className="flex justify-center mt-8">
               <Pagination
                 current={currentPage}
-                total={totalItems}
-                pageSize={itemsPerPage}
-                onChange={(page) => goToPage(page)}
-                onShowSizeChange={(current, size) => changeItemsPerPage(size)}
+                total={totalCount}
+                pageSize={limit}
+                onChange={handlePageChange}
+                onShowSizeChange={handlePageSizeChange}
                 showSizeChanger={true}
-                pageSizeOptions={['6', '9', '12', '18']}
+                pageSizeOptions={['6', '9', '12', '18', '24']}
                 showQuickJumper={true}
-                showTotal={(total, range) => 
-                  `${range[0]}-${range[1]} of ${total} restaurants`
-                }
                 className="ant-pagination-custom"
+                disabled={loading}
               />
             </div>
           </>
@@ -137,14 +151,14 @@ const RestaurantListView = () => {
             <div className="max-w-md mx-auto">
               <div className="text-gray-400 mb-6">
                 <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">No restaurants found</h3>
               <p className="text-gray-600 mb-6">
-                {searchTerm ? (
+                {filters.name ? (
                   <>
-                    No restaurants match your search for "<strong>{searchTerm}</strong>" with the current filters.
+                    No restaurants match your search for "<strong>{filters.name}</strong>" with the current filters.
                   </>
                 ) : (
                   <>
@@ -154,9 +168,9 @@ const RestaurantListView = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                {searchTerm && (
+                {filters.name && (
                   <button
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => applyFilters({ ...filters, name: '' }, 1, limit)}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Clear Search

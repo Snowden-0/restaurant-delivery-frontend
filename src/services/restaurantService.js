@@ -27,6 +27,14 @@ export const restaurantService = {
       if (filters.minRating !== null && filters.minRating !== undefined) {
         params.append('minRating', filters.minRating.toString());
       }
+
+      if (filters.page) {
+        params.append('page', filters.page.toString());
+      }
+
+      if (filters.limit) {
+        params.append('limit', filters.limit.toString());
+      }
       
       const queryString = params.toString();
       const url = queryString ? `/api/restaurants?${queryString}` : '/api/restaurants';
@@ -89,9 +97,9 @@ export const restaurantService = {
     }
   },
 
-  getRestaurantsByCuisine: async (cuisineId) => {
+  getRestaurantsByCuisine: async (cuisineId, page = 1, limit = 10) => {
     try {
-      const response = await api.get(`/api/restaurants?cuisines=${cuisineId}`);
+      const response = await api.get(`/api/restaurants?cuisines=${cuisineId}&page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching restaurants by cuisine:', error);
@@ -99,9 +107,9 @@ export const restaurantService = {
     }
   },
 
-  getRestaurantsByRating: async (minRating) => {
+  getRestaurantsByRating: async (minRating, page = 1, limit = 10) => {
     try {
-      const response = await api.get(`/api/restaurants?minRating=${minRating}`);
+      const response = await api.get(`/api/restaurants?minRating=${minRating}&page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching restaurants by rating:', error);
@@ -109,9 +117,9 @@ export const restaurantService = {
     }
   },
 
-  getOpenRestaurants: async () => {
+  getOpenRestaurants: async (page = 1, limit = 10) => {
     try {
-      const response = await api.get('/api/restaurants?isOpen=true');
+      const response = await api.get(`/api/restaurants?isOpen=true&page=${page}&limit=${limit}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching open restaurants:', error);
@@ -126,8 +134,8 @@ export const restaurantService = {
         cuisines = [],
         minRating,
         isOpen,
-        sortBy = 'name',
-        sortOrder = 'asc'
+        page = 1,
+        limit = 10
       } = searchParams;
 
       const params = new URLSearchParams();
@@ -136,6 +144,8 @@ export const restaurantService = {
       if (cuisines.length > 0) params.append('cuisines', cuisines.join(','));
       if (minRating !== null && minRating !== undefined) params.append('minRating', minRating);
       if (isOpen !== null && isOpen !== undefined) params.append('isOpen', isOpen);
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
       
       const response = await api.get(`/api/restaurants?${params.toString()}`);
       return response.data;
