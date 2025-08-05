@@ -7,7 +7,6 @@ import { Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button'; 
 
-
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
 const INPUT_BASE_CLASSES = 'w-full pl-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all';
 const SEARCH_ICON_CLASSES = 'absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400';
@@ -17,15 +16,16 @@ const INNER_CONTAINER_CLASSES = 'flex items-center justify-between px-4 py-3';
 const LOGO_CONTAINER_CLASSES = 'bg-gray-900 p-2 rounded-lg flex items-center justify-center';
 const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 
-
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { searchTerm, setSearchTerm } = useRestaurant();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
+
+  if (isLoading) return null;
 
   return (
     <header className={`${HEADER_CLASSES} h-20`}>
@@ -35,9 +35,8 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             <div className={LOGO_CONTAINER_CLASSES}>
               <Link to={"/"}>
-              <UtensilsCrossed className="text-white" size={28} />
+                <UtensilsCrossed className="text-white" size={28} />
               </Link>
-              
             </div>
             <Link to="/" className={TITLE_CLASSES}>
               FoodieExpress
@@ -94,9 +93,10 @@ const Header = () => {
           
           <Cart />
           
-          {isAuthenticated && <UserProfile />}
-
-          {!isAuthenticated && (
+          {/* Only show UserProfile if authenticated */}
+          {isAuthenticated ? (
+            <UserProfile />
+          ) : (
             <Link to="/login">
               <Button>Login</Button>
             </Link>

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { login as authLogin, signup as authSignup } from '../services/authServices';
 
 const ERROR_CONTEXT_MISUSE = 'useAuth must be used within AuthProvider';
@@ -32,31 +32,67 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true); 
     const [error, setError] = useState(null);
+    const logoutTimerRef = useRef();
+
+    const handleLogout = useCallback(() => {
+        localStorage.removeItem('authToken');
+        setUser(null);
+        setIsAuthenticated(false);
+        clearTimeout(logoutTimerRef.current);
+    }, []);
+
+    const checkTokenExpiration = useCallback((token) => {
+        const decoded = decodeJwt(token);
+        if (decoded && decoded.exp) {
+            const expirationTime = decoded.exp * 1000;
+            const currentTime = Date.now();
+            
+            if (expirationTime < currentTime) {
+                handleLogout();
+                return false;
+            } else {
+                logoutTimerRef.current = setTimeout(
+                    handleLogout, 
+                    expirationTime - currentTime
+                );
+                return true;
+            }
+        }
+        return false;
+    }, [handleLogout]);
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
             const decodedUser = decodeJwt(token); 
             if (decodedUser && decodedUser.name && decodedUser.email) {
-                setUser(decodedUser);
-                setIsAuthenticated(true);
+                const isValid = checkTokenExpiration(token);
+                if (isValid) {
+                    setUser(decodedUser);
+                    setIsAuthenticated(true);
+                }
             } else {
                 localStorage.removeItem('authToken');
-                setIsAuthenticated(false);
-                setUser(null);
             }
         }
         setIsLoading(false);
-    }, []);
+        
+        return () => clearTimeout(logoutTimerRef.current);
+    }, [checkTokenExpiration]);
 
     const handleLogin = async (formData) => {
         try {
             setError(null); 
             const data = await authLogin(formData.email, formData.password);
             localStorage.setItem('authToken', data.token); 
-            const decodeUser = decodeJwt(data.token)
-            setUser(decodeUser); 
-            setIsAuthenticated(true);
+            const decodedUser = decodeJwt(data.token);
+            
+            const isValid = checkTokenExpiration(data.token);
+            if (isValid) {
+                setUser(decodedUser); 
+                setIsAuthenticated(true);
+            }
+            
             return data; 
         } catch (error) {
             setError(error.message ||  "Login failed");
@@ -67,23 +103,21 @@ export const AuthProvider = ({ children }) => {
     const handleSignup = async (userData) => {
         try {
             setError(null);
-            
             const data = await authSignup(userData);
             localStorage.setItem('authToken', data.token); 
             const decodedUser = decodeJwt(data.token);
-            setUser(decodedUser);
-            setIsAuthenticated(true);
+            
+            const isValid = checkTokenExpiration(data.token);
+            if (isValid) {
+                setUser(decodedUser);
+                setIsAuthenticated(true);
+            }
+            
             return data;
         } catch (error) {
-            setError(error.message ||  "Login failed");
+            setError(error.message ||  "Signup failed");
             throw error;
         }
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        setUser(null);
-        setIsAuthenticated(false);
     };
 
     const value = {
@@ -99,7 +133,6 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {/* We don't render children until the initial token check is complete */}
             {!isLoading && children}
         </AuthContext.Provider>
     );

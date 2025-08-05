@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAlert } from './AlertContext'; // Import useAlert
+import { useAlert } from './AlertContext';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -9,11 +10,34 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const { showAlert } = useAlert(); // Use the showAlert function from AlertContext
+  const { showAlert } = useAlert();
+  const { isAuthenticated } = useAuth(); 
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch (e) {
+        localStorage.removeItem('cart');
+        setCartItems([]);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCartItems([]);
+      localStorage.removeItem('cart');
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     let itemsCount = 0;
@@ -26,19 +50,17 @@ export const CartProvider = ({ children }) => {
 
     setTotalItems(itemsCount);
     setTotalPrice(priceSum);
-    
   }, [cartItems]);
 
   const addItemToCart = (item) => {
     if (!item.restaurantId) {
-      showAlert("Sorry, this item cannot be added to the cart right now.", "error"); // Use custom alert
+      showAlert("Sorry, this item cannot be added to the cart right now.", "error");
       return;
     }
 
     setCartItems((prevItems) => {
-      // Check if cart has items from a different restaurant
       if (prevItems.length > 0 && prevItems[0].restaurantId !== item.restaurantId) {
-        showAlert("You can only order from one restaurant at a time. Your previous cart has been cleared.", "warning"); // Use custom alert
+        showAlert("You can only order from one restaurant at a time. Your previous cart has been cleared.", "warning");
         return [{ ...item, quantity: 1 }]; 
       }
 
@@ -77,6 +99,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('cart');
   };
 
   const contextValue = {

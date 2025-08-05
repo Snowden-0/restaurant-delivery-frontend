@@ -30,6 +30,19 @@ const PrivateRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+const PublicRoute = ({ children }) => {
+    const { isAuthenticated, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <p className="text-lg text-gray-700">Loading application...</p>
+            </div>
+        );
+    }
+    return isAuthenticated ? <Navigate to="/restaurants" /> : children;
+}
+
 function App() {
   return (
     <>
@@ -75,8 +88,8 @@ function AppContent() {
                 <Route path="/order-confirmation" element={<PrivateRoute><OrderConfirmationPage /></PrivateRoute>} />
                 <Route path="/orders" element={<PrivateRoute><OrdersView /></PrivateRoute>} />
           </Route>
-                <Route path='/login' element={<LoginPage />} />
-                <Route path='/signup' element={<SignupPage />} />
+                <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
+                <Route path='/signup' element={<PublicRoute><SignupPage /></PublicRoute>} />
         </Routes>
     </>
   );
