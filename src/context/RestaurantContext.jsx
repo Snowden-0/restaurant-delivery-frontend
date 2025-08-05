@@ -3,8 +3,7 @@ import React, {
   useContext,
   useState,
   useEffect,
-  useCallback,
-  useMemo
+  useCallback
 } from 'react';
 import { restaurantService } from '../services/restaurantService';
 
@@ -12,7 +11,14 @@ const ERROR_CONTEXT_MISUSE = 'useRestaurant must be used within RestaurantProvid
 const ERROR_FETCH_RESTAURANTS = 'Failed to fetch restaurants';
 const ERROR_FETCH_DETAILS = 'Failed to fetch restaurant details and menu';
 
-const DEFAULT_ITEMS_PER_PAGE = 9; 
+const DEFAULT_ITEMS_PER_PAGE = 9;
+
+const DEFAULT_FILTERS = {
+  cuisines: [],
+  minRating: null,
+  isOpen: null,
+  name: ''
+};
 
 const RestaurantContext = createContext();
 
@@ -26,30 +32,84 @@ export const useRestaurant = () => {
 
 export const RestaurantProvider = ({ children }) => {
   const [restaurants, setRestaurants] = useState([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  
+  // Backend pagination state
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 0,
+    totalCount: 0,
+    limit: DEFAULT_ITEMS_PER_PAGE,
+    hasNextPage: false,
+    hasPreviousPage: false
+  });
 
-  const fetchRestaurants = useCallback(async () => {
+  const fetchRestaurants = useCallback(async (filterParams = {}, page = 1, limit = DEFAULT_ITEMS_PER_PAGE) => {
     setLoading(true);
     setError(null);
     
     try {
-      const data = await restaurantService.getAllRestaurants();
-      setRestaurants(data);
-      setFilteredRestaurants(data);
-      setCurrentPage(1);
+      const requestParams = {
+        ...filterParams,
+        page,
+        limit
+      };
+
+      const response = await restaurantService.getAllRestaurants(requestParams);
+      
+      // Handle backend response structure
+      if (response.data && response.pagination) {
+        // Backend returns { data: [...], pagination: {...} }
+        setRestaurants(response.data);
+        setPagination(response.pagination);
+      } else {
+        // Fallback for old response format (just array)
+        setRestaurants(response);
+        setPagination({
+          currentPage: page,
+          totalPages: 1,
+          totalCount: response.length,
+          limit,
+          hasNextPage: false,
+          hasPreviousPage: false
+        });
+      }
     } catch (err) {
       setError(err.message || ERROR_FETCH_RESTAURANTS);
+      setRestaurants([]);
+      setPagination({
+        currentPage: 1,
+        totalPages: 0,
+        totalCount: 0,
+        limit,
+        hasNextPage: false,
+        hasPreviousPage: false
+      });
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const applyFilters = useCallback(async (newFilters, page = 1, limit = pagination.limit) => {
+    setFilters(newFilters);
+    
+    const filterParams = {};
+    if (newFilters.name) filterParams.name = newFilters.name;
+    if (newFilters.cuisines.length > 0) filterParams.cuisines = newFilters.cuisines;
+    if (newFilters.isOpen !== null) filterParams.isOpen = newFilters.isOpen;
+    if (newFilters.minRating !== null) filterParams.minRating = newFilters.minRating;
+    
+    await fetchRestaurants(filterParams, page, limit);
+  }, [fetchRestaurants, pagination.limit]);
+
+  const clearAllFilters = useCallback(async () => {
+    setFilters(DEFAULT_FILTERS);
+    await fetchRestaurants({}, 1, pagination.limit);
+  }, [fetchRestaurants, pagination.limit]);
 
   const getRestaurantById = useCallback(async (id) => {
     setLoading(true);
@@ -65,89 +125,60 @@ export const RestaurantProvider = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (searchTerm === '') {
-      setFilteredRestaurants(restaurants);
-    } else {
-      const lowercasedTerm = searchTerm.toLowerCase();
-      const filtered = restaurants.filter(restaurant =>
-        restaurant.name.toLowerCase().includes(lowercasedTerm) ||
-        restaurant.cuisine?.toLowerCase().includes(lowercasedTerm) ||
-        restaurant.location?.toLowerCase().includes(lowercasedTerm)
-      );
-      setFilteredRestaurants(filtered);
-    }
-    setCurrentPage(1);
-  }, [searchTerm, restaurants]);
-
-  const paginationData = useMemo(() => {
-    const totalItems = filteredRestaurants.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedRestaurants = filteredRestaurants.slice(startIndex, endIndex);
-
-    return {
-      paginatedRestaurants,
-      totalItems,
-      totalPages,
-      hasNextPage: currentPage < totalPages,
-      hasPreviousPage: currentPage > 1,
-    };
-  }, [filteredRestaurants, currentPage, itemsPerPage]);
-
   // Pagination handlers
-  const goToPage = useCallback((page) => {
-    if (page >= 1 && page <= paginationData.totalPages) {
-      setCurrentPage(page);
+  const goToPage = useCallback(async (page) => {
+    if (page >= 1 && page <= pagination.totalPages) {
+      const filterParams = {};
+      if (filters.name) filterParams.name = filters.name;
+      if (filters.cuisines.length > 0) filterParams.cuisines = filters.cuisines;
+      if (filters.isOpen !== null) filterParams.isOpen = filters.isOpen;
+      if (filters.minRating !== null) filterParams.minRating = filters.minRating;
+      
+      await fetchRestaurants(filterParams, page, pagination.limit);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [paginationData.totalPages]);
+  }, [fetchRestaurants, filters, pagination.limit, pagination.totalPages]);
 
-  const goToNextPage = useCallback(() => {
-    if (paginationData.hasNextPage) {
-      goToPage(currentPage + 1);
-    }
-  }, [currentPage, paginationData.hasNextPage, goToPage]);
+  const changeItemsPerPage = useCallback(async (newLimit) => {
+    const filterParams = {};
+    if (filters.name) filterParams.name = filters.name;
+    if (filters.cuisines.length > 0) filterParams.cuisines = filters.cuisines;
+    if (filters.isOpen !== null) filterParams.isOpen = filters.isOpen;
+    if (filters.minRating !== null) filterParams.minRating = filters.minRating;
+    
+    await fetchRestaurants(filterParams, 1, newLimit);
+  }, [fetchRestaurants, filters]);
 
-  const goToPreviousPage = useCallback(() => {
-    if (paginationData.hasPreviousPage) {
-      goToPage(currentPage - 1);
-    }
-  }, [currentPage, paginationData.hasPreviousPage, goToPage]);
-
-  const changeItemsPerPage = useCallback((newItemsPerPage) => {
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-  }, []);
-
+  // Initialize data
   useEffect(() => {
     fetchRestaurants();
   }, [fetchRestaurants]);
 
   const contextValue = {
-    restaurants: filteredRestaurants, 
+    // Restaurant data
+    restaurants,
     selectedRestaurant,
     loading,
     error,
-    searchTerm,
-    setSearchTerm,
+    
+    // Filters
+    filters,
+    applyFilters,
+    clearAllFilters,
+    
+    // Backend pagination
+    currentPage: pagination.currentPage,
+    totalPages: pagination.totalPages,
+    totalCount: pagination.totalCount,
+    limit: pagination.limit,
+    hasNextPage: pagination.hasNextPage,
+    hasPreviousPage: pagination.hasPreviousPage,
+    
+    // Actions
     fetchRestaurants,
     getRestaurantById,
     setSelectedRestaurant,
-    
-    paginatedRestaurants: paginationData.paginatedRestaurants,
-    currentPage,
-    itemsPerPage,
-    totalItems: paginationData.totalItems,
-    totalPages: paginationData.totalPages,
-    hasNextPage: paginationData.hasNextPage,
-    hasPreviousPage: paginationData.hasPreviousPage,
-    
-    // Pagination methods
     goToPage,
-    goToNextPage,
-    goToPreviousPage,
     changeItemsPerPage,
   };
 
