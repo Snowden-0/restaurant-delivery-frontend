@@ -3,7 +3,8 @@ import React, {
   useContext,
   useState,
   useEffect,
-  useCallback
+  useCallback,
+  // Removed useMemo as frontend sorting is no longer needed
 } from 'react';
 import { restaurantService } from '../services/restaurantService';
 
@@ -20,6 +21,8 @@ const DEFAULT_FILTERS = {
   name: ''
 };
 
+const DEFAULT_SORT_OPTION = 'name-asc'; // Default sort option
+
 const RestaurantContext = createContext();
 
 export const useRestaurant = () => {
@@ -31,14 +34,15 @@ export const useRestaurant = () => {
 };
 
 export const RestaurantProvider = ({ children }) => {
-  const [restaurants, setRestaurants] = useState([]);
+  const [restaurants, setRestaurants] = useState([]); // Now directly holds sorted data from backend
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-  
-  // Backend pagination state
+  const [searchTerm, setSearchTermState] = useState('');
+  const [sortOption, setSortOptionState] = useState(DEFAULT_SORT_OPTION);
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
@@ -48,26 +52,26 @@ export const RestaurantProvider = ({ children }) => {
     hasPreviousPage: false
   });
 
-  const fetchRestaurants = useCallback(async (filterParams = {}, page = 1, limit = DEFAULT_ITEMS_PER_PAGE) => {
+  // fetchRestaurants now sends 'sort' parameter to the backend
+  const fetchRestaurants = useCallback(async (filterParams = {}, page = 1, limit = DEFAULT_ITEMS_PER_PAGE, currentSortOption = sortOption) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const requestParams = {
         ...filterParams,
         page,
-        limit
+        limit,
+        sort: currentSortOption, // Include sort option for backend
       };
 
       const response = await restaurantService.getAllRestaurants(requestParams);
-      
-      // Handle backend response structure
+
       if (response.data && response.pagination) {
-        // Backend returns { data: [...], pagination: {...} }
         setRestaurants(response.data);
         setPagination(response.pagination);
       } else {
-        // Fallback for old response format (just array)
+        // Fallback for old response format (just array) - though backend should now return pagination
         setRestaurants(response);
         setPagination({
           currentPage: page,
@@ -92,29 +96,24 @@ export const RestaurantProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sortOption]); // Depend on sortOption so it's always current
 
+  // applyFilters now also passes the current sortOption
   const applyFilters = useCallback(async (newFilters, page = 1, limit = pagination.limit) => {
     setFilters(newFilters);
-    
-    const filterParams = {};
-    if (newFilters.name) filterParams.name = newFilters.name;
-    if (newFilters.cuisines.length > 0) filterParams.cuisines = newFilters.cuisines;
-    if (newFilters.isOpen !== null) filterParams.isOpen = newFilters.isOpen;
-    if (newFilters.minRating !== null) filterParams.minRating = newFilters.minRating;
-    
-    await fetchRestaurants(filterParams, page, limit);
-  }, [fetchRestaurants, pagination.limit]);
+    await fetchRestaurants(newFilters, page, limit, sortOption);
+  }, [fetchRestaurants, pagination.limit, sortOption]);
 
+  // clearAllFilters now also passes the current sortOption
   const clearAllFilters = useCallback(async () => {
     setFilters(DEFAULT_FILTERS);
-    await fetchRestaurants({}, 1, pagination.limit);
-  }, [fetchRestaurants, pagination.limit]);
+    await fetchRestaurants(DEFAULT_FILTERS, 1, pagination.limit, sortOption);
+  }, [fetchRestaurants, pagination.limit, sortOption]);
 
   const getRestaurantById = useCallback(async (id) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const data = await restaurantService.getRestaurantById(id);
       setSelectedRestaurant(data);
@@ -125,47 +124,56 @@ export const RestaurantProvider = ({ children }) => {
     }
   }, []);
 
-  // Pagination handlers
+  // Pagination handlers now also pass the current sortOption
   const goToPage = useCallback(async (page) => {
     if (page >= 1 && page <= pagination.totalPages) {
-      const filterParams = {};
-      if (filters.name) filterParams.name = filters.name;
-      if (filters.cuisines.length > 0) filterParams.cuisines = filters.cuisines;
-      if (filters.isOpen !== null) filterParams.isOpen = filters.isOpen;
-      if (filters.minRating !== null) filterParams.minRating = filters.minRating;
-      
-      await fetchRestaurants(filterParams, page, pagination.limit);
+      await fetchRestaurants(filters, page, pagination.limit, sortOption);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [fetchRestaurants, filters, pagination.limit, pagination.totalPages]);
+  }, [fetchRestaurants, filters, pagination.limit, pagination.totalPages, sortOption]);
 
   const changeItemsPerPage = useCallback(async (newLimit) => {
-    const filterParams = {};
-    if (filters.name) filterParams.name = filters.name;
-    if (filters.cuisines.length > 0) filterParams.cuisines = filters.cuisines;
-    if (filters.isOpen !== null) filterParams.isOpen = filters.isOpen;
-    if (filters.minRating !== null) filterParams.minRating = filters.minRating;
-    
-    await fetchRestaurants(filterParams, 1, newLimit);
-  }, [fetchRestaurants, filters]);
+    await fetchRestaurants(filters, 1, newLimit, sortOption);
+  }, [fetchRestaurants, filters, sortOption]);
 
-  // Initialize data
+  // setSearchTerm now triggers a fetch with the new search term and current sortOption
+  const setSearchTerm = useCallback(async (newSearchTerm) => {
+    setSearchTermState(newSearchTerm);
+    const updatedFilters = { ...filters, name: newSearchTerm };
+    setFilters(updatedFilters);
+    await fetchRestaurants(updatedFilters, 1, pagination.limit, sortOption);
+  }, [fetchRestaurants, filters, pagination.limit, sortOption]);
+
+  // setSortOption now triggers a fetch with the new sort option and current filters
+  const setSortOption = useCallback(async (newSortOption) => {
+    setSortOptionState(newSortOption);
+    // Trigger a new fetch with the updated sort option
+    await fetchRestaurants(filters, pagination.currentPage, pagination.limit, newSortOption);
+  }, [fetchRestaurants, filters, pagination.currentPage, pagination.limit]);
+
+  // Initial data fetch on component mount, including initial sort option
   useEffect(() => {
-    fetchRestaurants();
-  }, [fetchRestaurants]);
+    fetchRestaurants(filters, 1, DEFAULT_ITEMS_PER_PAGE, sortOption);
+  }, [fetchRestaurants, filters, sortOption]); // Added filters and sortOption to deps for initial fetch
 
   const contextValue = {
     // Restaurant data
-    restaurants,
+    restaurants, // Now directly from backend, already sorted
     selectedRestaurant,
     loading,
     error,
-    
+
     // Filters
     filters,
     applyFilters,
     clearAllFilters,
-    
+
+    // Search and Sort
+    searchTerm,
+    setSearchTerm,
+    sortOption,
+    setSortOption,
+
     // Backend pagination
     currentPage: pagination.currentPage,
     totalPages: pagination.totalPages,
@@ -173,7 +181,7 @@ export const RestaurantProvider = ({ children }) => {
     limit: pagination.limit,
     hasNextPage: pagination.hasNextPage,
     hasPreviousPage: pagination.hasPreviousPage,
-    
+
     // Actions
     fetchRestaurants,
     getRestaurantById,
