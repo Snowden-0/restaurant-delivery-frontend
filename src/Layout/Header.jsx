@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { X, UtensilsCrossed, Search } from 'lucide-react';
 import UserProfile from './UserProfile';
 import { useRestaurant } from '../context/RestaurantContext';
-import Cart from '../components/ui/Cart'; 
+import Cart from '../components/ui/Cart';
 import { Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
-import Button from '../components/ui/Button'; 
+import Button from '../components/ui/Button';
 
 const COMMON_BUTTON_CLASSES = 'p-2 rounded-lg hover:bg-gray-100 transition-colors';
 const INPUT_BASE_CLASSES = 'w-full pl-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all';
@@ -18,6 +18,7 @@ const TITLE_CLASSES = 'text-xl font-extrabold text-gray-800 hidden sm:block';
 
 const Header = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  // Use searchTerm and setSearchTerm from the RestaurantContext
   const { searchTerm, setSearchTerm } = useRestaurant();
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -90,9 +91,9 @@ const Header = () => {
               <Search size={18} className="text-gray-600" />
             </button>
           )}
-          
+
           <Cart />
-          
+
           {/* Only show UserProfile if authenticated */}
           {isAuthenticated ? (
             <UserProfile />

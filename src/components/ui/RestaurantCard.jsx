@@ -202,7 +202,7 @@ const RestaurantCard = ({ restaurant }) => {
           onClick={handleViewDetails}
           className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         >
-          View Details
+          Order Now
         </button>
       </div>
     </div>

@@ -4,9 +4,9 @@ import FilterBar from '../components/filters/FilterBar';
 import { Pagination } from 'antd';
 
 const RestaurantListView = () => {
-  const { 
-    restaurants,
-    loading, 
+  const {
+    restaurants, // This now receives the sorted array from context
+    loading,
     error,
     currentPage,
     totalPages,
@@ -16,7 +16,9 @@ const RestaurantListView = () => {
     changeItemsPerPage,
     filters,
     applyFilters,
-    clearAllFilters
+    clearAllFilters,
+    sortOption,
+    setSortOption
   } = useRestaurant();
 
   const handlePageChange = (page) => {
@@ -53,7 +55,7 @@ const RestaurantListView = () => {
               </div>
               <h3 className="text-lg font-medium text-red-900 mb-2">Something went wrong</h3>
               <p className="text-red-700 mb-4">{error}</p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
               >
@@ -87,6 +89,8 @@ const RestaurantListView = () => {
         onFiltersChange={(newFilters) => applyFilters(newFilters, 1, limit)}
         onClearAllFilters={clearAllFilters}
         totalResults={totalCount}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
       />
 
       {/* Main Content */}
@@ -99,7 +103,7 @@ const RestaurantListView = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <span className="font-medium">
-                  Search results for "{filters.name}" 
+                  Search results for "{filters.name}"
                   {totalCount > 0 && (
                     <span className="font-normal"> - {totalCount} restaurant{totalCount !== 1 ? 's' : ''} found</span>
                   )}
@@ -108,7 +112,7 @@ const RestaurantListView = () => {
             </div>
           </div>
         )}
-        
+
         {restaurants.length > 0 ? (
           <>
             {/* Results Summary */}
@@ -129,7 +133,7 @@ const RestaurantListView = () => {
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} />
               ))}
             </div>
-            
+
             {/* Pagination */}
             <div className="flex justify-center mt-8">
               <Pagination
@@ -166,7 +170,7 @@ const RestaurantListView = () => {
                   </>
                 )}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 {filters.name && (
                   <button
