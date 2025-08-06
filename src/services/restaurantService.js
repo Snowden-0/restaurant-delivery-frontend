@@ -36,9 +36,12 @@ export const restaurantService = {
         params.append('limit', filters.limit.toString());
       }
 
-      // Add the sort parameter to the URL
       if (filters.sort) {
-        params.append('sort', filters.sort);
+        const [sortBy, sortOrder] = filters.sort.split('-');
+        if (sortBy && sortOrder) {
+          params.append('sortBy', sortBy);
+          params.append('sortOrder', sortOrder.toUpperCase());
+        }
       }
 
       const queryString = params.toString();
@@ -141,7 +144,7 @@ export const restaurantService = {
         isOpen,
         page = 1,
         limit = 10,
-        sort // Add sort parameter here too for advanced search
+        sort 
       } = searchParams;
 
       const params = new URLSearchParams();
@@ -150,7 +153,15 @@ export const restaurantService = {
       if (cuisines.length > 0) params.append('cuisines', cuisines.join(','));
       if (minRating !== null && minRating !== undefined) params.append('minRating', minRating);
       if (isOpen !== null && isOpen !== undefined) params.append('isOpen', isOpen);
-      if (sort) params.append('sort', sort); // Append sort for advanced search
+
+      if (sort) {
+        const [sortBy, sortOrder] = sort.split('-');
+        if (sortBy && sortOrder) {
+          params.append('sortBy', sortBy);
+          params.append('sortOrder', sortOrder.toUpperCase());
+        }
+      }
+
       params.append('page', page.toString());
       params.append('limit', limit.toString());
 
